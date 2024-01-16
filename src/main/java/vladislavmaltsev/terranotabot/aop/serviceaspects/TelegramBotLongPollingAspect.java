@@ -1,34 +1,33 @@
 package vladislavmaltsev.terranotabot.aop.serviceaspects;
 
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.context.annotation.Configuration;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
+import java.util.List;
 
 @Aspect
 @Configuration
 @Slf4j
 public class TelegramBotLongPollingAspect {
 
-//    @Pointcut("execution( * vladislavmaltsev.terranotabot.service.TestAspect.testAs(..))")
-//    public void isTest(){}
-
-
-//    @Before("isTest()")
-//    public void testAspect(){
-//        log.error("Test Aspect");
-//        System.out.println("TestAspect");
-//    }
-
-//    @Pointcut("execution( *  vladislavmaltsev.terranotabot.service.TerraNotaBotLongPolling.onUpdateReceived(..))")
-    @Pointcut("target(org.telegram.telegrambots.bots.TelegramLongPollingBot)")
-    public void isOnUpdateReceived() {
+    @Pointcut("execution( *  org.telegram.telegrambots.meta.generics.LongPollingBot.onUpdatesReceived(java.util.List))")
+    public void isOnUpdateReceivedList() {
     }
 
-    @Before("isOnUpdateReceived()")
-    public void logServiceBefore() {
-        log.error("In onUpdateReceived method");
-        System.out.println("IN ASPECT");
+    @Before("isOnUpdateReceivedList() " +
+            "&& args(object)")
+    public void logServiceBefore(JoinPoint joinPoint, Object object) {
+
+        List<Update> updateList = (List<Update>) object;
+
+        for (Update update : updateList) {
+            log.debug("Update messages: " + update.getMessage().getText());
+        }
+        log.debug("In TelegramLongPollingBot " + joinPoint.toString());
     }
 }

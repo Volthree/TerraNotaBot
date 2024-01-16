@@ -26,19 +26,15 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     @LogAnn
     public void onUpdateReceived(Update update) {
         if (update.hasMessage() && update.getMessage().hasText()){
-//            System.out.println(update.getMessage().getText());
             SendMessage sendMessage = new SendMessage();
             sendMessage.setChatId(update.getMessage().getChatId());
             sendMessage.setText("This is text " +  update.getMessage().getText());
-            log.debug(update.getMessage().getText());
             testAspect.testAs();
             try {
                 execute(sendMessage);
             }catch (Exception e){
-                log.error(e.getMessage());
             }
         }
-        log.debug("END method onUpdateReceived");
     }
 
     @Override

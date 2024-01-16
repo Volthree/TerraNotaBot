@@ -12,7 +12,7 @@ public class TerraNotaBotApplication {
     private static ApplicationContext applicationContext;
     public static void main(String[] args) {
         applicationContext = SpringApplication.run(TerraNotaBotApplication.class, args);
-        displayAllBeans();
+//        displayAllBeans();
     }
     public static void displayAllBeans() {
         String[] allBeanNames = applicationContext.getBeanDefinitionNames();
