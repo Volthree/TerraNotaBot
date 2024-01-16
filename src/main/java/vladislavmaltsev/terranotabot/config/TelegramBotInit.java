@@ -8,18 +8,18 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
-import vladislavmaltsev.terranotabot.service.TelegramBotLongPolling;
+import vladislavmaltsev.terranotabot.service.TerraNotaBotLongPolling;
 
 @Component
 @Slf4j
 public class TelegramBotInit {
 
 
-    TelegramBotLongPolling telegramBotLongPolling;
+    TerraNotaBotLongPolling terraNotaBotLongPolling;
 
     @Autowired
-    public TelegramBotInit(TelegramBotLongPolling telegramBotLongPolling) {
-        this.telegramBotLongPolling = telegramBotLongPolling;
+    public TelegramBotInit(TerraNotaBotLongPolling terraNotaBotLongPolling) {
+        this.terraNotaBotLongPolling = terraNotaBotLongPolling;
     }
 
     @EventListener({ContextRefreshedEvent.class})
@@ -28,7 +28,7 @@ public class TelegramBotInit {
         TelegramBotsApi telegramBotsApi;
         try {
             telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(telegramBotLongPolling);
+            telegramBotsApi.registerBot(terraNotaBotLongPolling);
         } catch (TelegramApiException t) {
             log.error(t.getMessage());
         }
