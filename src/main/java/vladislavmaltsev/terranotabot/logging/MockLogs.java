@@ -1,14 +1,13 @@
 package vladislavmaltsev.terranotabot.logging;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 public class MockLogs {
-    private static Logger logger = LogManager.getLogger();
+
     public void getMockLogs(){
-        logger.debug("This is a debug message");
-        logger.info("This is an info message");
-        logger.warn("This is a warn message");
-        logger.error("This is an error message");
-        logger.fatal("This is a fatal message");
+        log.debug("This is a debug message");
+        log.info("This is an info message");
+        log.warn("This is a warn message");
+        log.error("This is an error message");
     }
 }
