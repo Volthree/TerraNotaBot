@@ -26,8 +26,10 @@ public class TelegramBotLongPollingAspect {
         List<Update> updateList = (List<Update>) object;
 
         for (Update update : updateList) {
-            log.debug("Update messages: " + update.getMessage().getText());
+            if (update.hasMessage())
+                log.info("Update messages: " + update.getMessage().getText());
+            else
+                log.info("Update without message");
         }
-        log.debug("In TelegramLongPollingBot " + joinPoint.toString());
     }
 }
