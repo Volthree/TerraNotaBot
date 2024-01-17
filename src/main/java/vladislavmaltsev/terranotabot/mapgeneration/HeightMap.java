@@ -1,7 +1,8 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class HeightMap {
-    public void heightMap(double poleSize, double[][] array) {
+    public void generateHeightMap(double poleSize, double[][] array,
+                                  double heightDifference, int islandsModifier) {
         double score = 1;
         double g = poleSize / score;
         double terra = 1;
@@ -26,17 +27,17 @@ public class HeightMap {
                     score = 2;
                     g = poleSize / score;
                     Square center = new Square();
-                    center.go(score, array, xCordStart, yCordStart, poleSize, heights, terra);
+                    center.go(score, array, xCordStart, yCordStart, poleSize, heights, terra, islandsModifier, heightDifference);
                 }
 
                 Diamond d1 = new Diamond();
-                d1.diamond(g, array, (xCordStart - g), yCordStart, poleSize, score);
+                d1.diamond(g, array, (xCordStart - g), yCordStart, poleSize, score, heightDifference);
                 Diamond d2 = new Diamond();
-                d2.diamond(g, array, (xCordStart + g), yCordStart, poleSize, score);
+                d2.diamond(g, array, (xCordStart + g), yCordStart, poleSize, score, heightDifference);
                 Diamond d3 = new Diamond();
-                d3.diamond(g, array, xCordStart, (yCordStart - g), poleSize, score);
+                d3.diamond(g, array, xCordStart, (yCordStart - g), poleSize, score, heightDifference);
                 Diamond d4 = new Diamond();
-                d4.diamond(g, array, xCordStart, (yCordStart + g), poleSize, score);
+                d4.diamond(g, array, xCordStart, (yCordStart + g), poleSize, score, heightDifference);
 
             } else {
                 xCordStart = (poleSize / (score * 2));
@@ -52,7 +53,7 @@ public class HeightMap {
                         if (0 <= yCord && yCord <= poleSize && 0 <= xCord && xCord <= poleSize) {
                             yCord = yCord + coefficientStepY;
                             Square sq = new Square();
-                            sq.go((score * 2), array, xCord, yCord, poleSize, heights, (terra));
+                            sq.go((score * 2), array, xCord, yCord, poleSize, heights, (terra), islandsModifier, heightDifference);
                             coefficientStepY = poleSize / score;
                         }
                     }
@@ -72,13 +73,13 @@ public class HeightMap {
                         if (0 <= yCord && yCord <= poleSize && 0 <= xCord && xCord <= poleSize) {
                             yCord = yCord + coefficientStepY;
                             Diamond d1 = new Diamond();
-                            d1.diamond(g, array, (xCord - g), yCord, poleSize, score);
+                            d1.diamond(g, array, (xCord - g), yCord, poleSize, score, heightDifference);
                             Diamond d2 = new Diamond();
-                            d2.diamond(g, array, (xCord + g), yCord, poleSize, score);
+                            d2.diamond(g, array, (xCord + g), yCord, poleSize, score, heightDifference);
                             Diamond d3 = new Diamond();
-                            d3.diamond(g, array, xCord, (yCord - g), poleSize, score);
+                            d3.diamond(g, array, xCord, (yCord - g), poleSize, score, heightDifference);
                             Diamond d4 = new Diamond();
-                            d4.diamond(g, array, xCord, (yCord + g), poleSize, score);
+                            d4.diamond(g, array, xCord, (yCord + g), poleSize, score, heightDifference);
                             coefficientStepY = poleSize / score;
                         }
                     }

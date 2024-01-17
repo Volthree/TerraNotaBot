@@ -2,8 +2,8 @@ package vladislavmaltsev.terranotabot.mapgeneration;
 
 
 public class Alignment {
-    public void alignmentMethod(double[][] array, double poleSize) {
-        int cellSize = 4;
+    public void alignmentMethod(double[][] array, double poleSize, int mapScale) {
+        int cellSize = mapScale;
         double ali = 0;
         int count = -1;
         for (int ih = cellSize / 2; ih <= poleSize; ih = ih + cellSize) {

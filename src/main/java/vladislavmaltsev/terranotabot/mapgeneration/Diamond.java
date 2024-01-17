@@ -1,7 +1,8 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class Diamond {
-    public void diamond(double g, double[][] array, double xStartDia, double yStartDia, double fieldSize, double score) {
+    public void diamond(double g, double[][] array, double xStartDia, double yStartDia,
+                        double fieldSize, double score, double heightDiff) {
         if(array[(int) xStartDia][(int) yStartDia] ==0) {
 
             double hDia;
@@ -19,7 +20,7 @@ public class Diamond {
             double rt = array[(int) xStartDia][(int) ycMinusDia];
             double lt = array[(int) xStartDia][(int) ycPlusDia];
             double lb = array[(int) xcMinusDia][(int) yStartDia];
-            hDia = ((rb+lt+rt+lb)/4)+ ((Math.random()*10)-7 )/score*3;
+            hDia = ((rb+lt+rt+lb)/4)+ ((Math.random()*10)-7 )/score*heightDiff;
             array[(int) xStartDia][(int) yStartDia] = hDia;
         }
     }

@@ -1,7 +1,8 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class Square {
-    public void go(double score, double[][] array, double xCord, double yCord, double fieldSize, int v, double it) {
+    public void go(double score, double[][] array, double xCord, double yCord,
+                   double fieldSize, int v, double it, int islandModifier, double heightDifference) {
         double g = fieldSize / score;
         double heightTemp;
         double xcPlus = xCord + g;
@@ -15,7 +16,7 @@ public class Square {
         double lb = array[(int) xcMinus][(int) ycPlus];
 
         if (array[(int) xCord][(int) yCord] == 0) {
-            heightTemp = ((rb + rt + lt + lb) / 4) + Math.random() * 10 / score;
+            heightTemp = ((rb + rt + lt + lb) / 4) + Math.random() * islandModifier / score;
             array[(int) xCord][(int) yCord] = heightTemp;
         }
     }
