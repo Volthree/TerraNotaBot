@@ -11,7 +11,19 @@ public enum MainButtons {
     SMALL("SMALL"),
     MEDIUM("MEDIUM"),
     LARGE("LARGE"),
-    BACK("back");
+    BACK("back"),
+
+    X_1("x1"),
+    X_2("x2"),
+    X_4("x4"),
+
+    SMOOTH("Smooth"),
+    HILL("Hill"),
+    MOUNTAIN("Mountain"),
+
+    ISLANDS("Islands"),
+    BLACKWATER("Blackwater"),
+    CONTINENT("Continent");
 
     private final String value;
 

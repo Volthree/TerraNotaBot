@@ -1,6 +1,7 @@
 package vladislavmaltsev.terranotabot.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.cookie.SM;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -19,7 +20,6 @@ import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.service.enums.MainButtons;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import static vladislavmaltsev.terranotabot.service.enums.MainButtons.*;
@@ -35,6 +35,12 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         this.telegramBotConfig = telegramBotConfig;
     }
 
+    public static InlineKeyboardButton createButton(String setText, MainButtons button) {
+        var i = new InlineKeyboardButton();
+        i.setText(setText);
+        i.setCallbackData(button.toString());
+        return i;
+    }
 
     @Override
     @LogAnn
@@ -61,7 +67,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 if (sendPhoto != null)
                     execute(sendPhoto);
             } catch (Exception e) {
-                log.error(e.getMessage());
+                log.error("In first try 64 " + e.getMessage());
             }
         } else if (update.hasCallbackQuery()) {
             int messageId = update.getCallbackQuery().getMessage().getMessageId();
@@ -69,31 +75,48 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             String callbackData = update.getCallbackQuery().getData();
             MainButtons mainButton = MainButtons.valueOf(callbackData);
             log.info("Pressed button " + mainButton);
-            EditMessageReplyMarkup replyMarkup = null;
-            switch (mainButton){
+            EditMessageReplyMarkup replyMarkup = new EditMessageReplyMarkup();
+            replyMarkup.setChatId(chatId);
+            replyMarkup.setMessageId(messageId);
+            log.info("chatId-" + chatId + "  messageId-" + messageId);
+            switch (mainButton) {
                 case SIZE -> {
-                    System.out.println("size");
-                    replyMarkup = new EditMessageReplyMarkup();
-                    replyMarkup.setChatId(chatId);
-                    replyMarkup.setMessageId(messageId);
                     replyMarkup.setReplyMarkup(getSizeButtons());
                 }
-                case SCALE -> {System.out.println("scale");}
-                case GENERATE -> {System.out.println("generate");}
-                case GET_LAST_MAP -> {System.out.println("getLsatMap");}
-                case GET_PREVIOUS_MAP -> {System.out.println("GerPrevMap");}
-                case ISLANDS_MODIFIER -> {System.out.println("getIslands");}
-                case HEIGHT_DIFFERENCE -> {System.out.println("heightdiff");}
+                case SCALE -> {
+                    replyMarkup.setReplyMarkup(getScaleButtons());
+                }
+                case HEIGHT_DIFFERENCE -> {
+                    replyMarkup.setReplyMarkup(getHeightDifferenceButtons());
+                }
+                case ISLANDS_MODIFIER -> {
+                    replyMarkup.setReplyMarkup(getIslandsModifierButtons());
+                }
 
-                case SMALL -> {}
-                case MEDIUM -> {}
-                case LARGE -> {}
+                case GET_LAST_MAP -> {
+                }
+                case GET_PREVIOUS_MAP -> {
+                }
 
-                case BACK -> {}
-                default -> {System.out.println("default");}
+
+                case GENERATE -> {
+                }
+
+                case SMALL -> {
+                }
+                case MEDIUM -> {
+                }
+                case LARGE -> {
+                }
+
+                case BACK -> {
+                    replyMarkup.setReplyMarkup(getMainButtons());
+                }
+                default -> {
+                }
             }
             try {
-                    execute(replyMarkup);
+                execute(replyMarkup);
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -107,91 +130,108 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         sendMessage.setReplyMarkup(getMainButtons());
         return sendMessage;
     }
-    public InlineKeyboardMarkup getSizeButtons(){
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
-        List<InlineKeyboardButton> row1Button = new ArrayList<>();
-        List<InlineKeyboardButton> row2Button = new ArrayList<>();
 
-        var smallButton = new InlineKeyboardButton();
-        smallButton.setText("Small");
-        smallButton.setCallbackData(SMALL.toString());
+    public InlineKeyboardMarkup getSizeButtons() {
 
-        var mediumButton = new InlineKeyboardButton();
-        mediumButton.setText("Medium");
-        mediumButton.setCallbackData(MEDIUM.toString());
-
-        var largeButton = new InlineKeyboardButton();
-        largeButton.setText("Medium");
-        largeButton.setCallbackData(LARGE.toString());
-
-        row1Button.add(smallButton);
-        row1Button.add(mediumButton);
-        row1Button.add(largeButton);
-
-        var backButton = new InlineKeyboardButton();
-        backButton.setText("back");
-        backButton.setCallbackData(BACK.toString());
-        row2Button.add(backButton);
-
-        rowsButton.add(row1Button);
-        rowsButton.add(row2Button);
-
+        var row1Button = List.of(
+                createButton("Small", SMALL),
+                createButton("Medium", MEDIUM),
+                createButton("Large", LARGE)
+        );
+        var row2Button = List.of(
+                createButton("back", BACK)
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowsButton);
         return inlineKeyboardMarkup;
     }
-    public InlineKeyboardMarkup getMainButtons(){
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
-        List<InlineKeyboardButton> row1Button = new ArrayList<>();
-        List<InlineKeyboardButton> row2Button = new ArrayList<>();
-        List<InlineKeyboardButton> row3Button = new ArrayList<>();
-        List<InlineKeyboardButton> row4Button = new ArrayList<>();
+    public InlineKeyboardMarkup getHeightDifferenceButtons() {
 
-        var sizeButton = new InlineKeyboardButton();
-        sizeButton.setText("Map size");
-        sizeButton.setCallbackData(SIZE.toString());
+        var row1Button = List.of(
+                createButton("Smooth", SMOOTH),
+                createButton("Hill", HILL),
+                createButton("Mountain", MOUNTAIN)
+        );
+        var row2Button = List.of(
+                createButton("back", BACK)
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
+    public InlineKeyboardMarkup getIslandsModifierButtons() {
 
-        var cellSizeButton = new InlineKeyboardButton();
-        cellSizeButton.setText("Scale");
-        cellSizeButton.setCallbackData(MainButtons.SCALE.toString());
+        var row1Button = List.of(
+                createButton("Islands", ISLANDS),
+                createButton("Backwater", BLACKWATER),
+                createButton("Continent", CONTINENT)
+        );
+        var row2Button = List.of(
+                createButton("back", BACK)
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
 
-        row1Button.add(sizeButton);
-        row1Button.add(cellSizeButton);
+    public InlineKeyboardMarkup getScaleButtons() {
 
-        var heightDifferenceButton = new InlineKeyboardButton();
-        heightDifferenceButton.setText("Height difference");
-        heightDifferenceButton.setCallbackData(MainButtons.HEIGHT_DIFFERENCE.toString());
+        var row1Button = List.of(
+                createButton("x1", X_1),
+                createButton("x2", X_2),
+                createButton("x4", X_4)
+        );
+        var row2Button = List.of(
+                createButton("back", BACK)
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
 
-        var islandsButton = new InlineKeyboardButton();
-        islandsButton.setText("Islands modifier");
-        islandsButton.setCallbackData(MainButtons.ISLANDS_MODIFIER.toString());
+    public InlineKeyboardMarkup getMainButtons() {
 
-        row2Button.add(heightDifferenceButton);
-        row2Button.add(islandsButton);
+        var row1Button = List.of(
+                createButton("Map size", SIZE),
+                createButton("Scale", SCALE)
+        );
+        var row2Button = List.of(
+                createButton("Height difference", HEIGHT_DIFFERENCE),
+                createButton("Islands modifier", ISLANDS_MODIFIER)
 
-        var getLastGeneratedButton = new InlineKeyboardButton();
-        getLastGeneratedButton.setText("Get last map");
-        getLastGeneratedButton.setCallbackData(MainButtons.GET_LAST_MAP.toString());
+        );
+        var row3Button = List.of(
+                createButton("Get last map", GET_LAST_MAP),
+                createButton("Get previous map", GET_PREVIOUS_MAP)
 
-        var getPreviousGeneratedButton = new InlineKeyboardButton();
-        getPreviousGeneratedButton.setText("Get previous map");
-        getPreviousGeneratedButton.setCallbackData(MainButtons.GET_PREVIOUS_MAP.toString());
+        );
+        var row4Button = List.of(
+                createButton("Generate", GENERATE)
 
-        row3Button.add(getLastGeneratedButton);
-        row3Button.add(getPreviousGeneratedButton);
-
-        var generateButton = new InlineKeyboardButton();
-        generateButton.setText("Generate");
-        generateButton.setCallbackData(MainButtons.GENERATE.toString());
-
-        row4Button.add(generateButton);
-
-        rowsButton.add(row1Button);
-        rowsButton.add(row2Button);
-        rowsButton.add(row3Button);
-        rowsButton.add(row4Button);
-
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button,
+                row3Button,
+                row4Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowsButton);
         return inlineKeyboardMarkup;
     }
