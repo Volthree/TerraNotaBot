@@ -2,7 +2,7 @@ package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class HeightMap {
     public void generateHeightMap(int width, double[][] heightMap,
-                                  double heightDifference, int islandsModifier) {
+                                  int heightDifference, int islandsModifier) {
         double score = 1;
         double step = width / score;
         double dX;
@@ -74,7 +74,7 @@ public class HeightMap {
         }
     }
 
-    private void getDiamond(int width, double[][] heightMap, double heightDifference, double score, double step, double xCordStart, double yCordStart) {
+    private void getDiamond(int width, double[][] heightMap, int heightDifference, double score, double step, double xCordStart, double yCordStart) {
         new Diamond().diamond(step, heightMap, (xCordStart - step), yCordStart, width, score, heightDifference);
         new Diamond().diamond(step, heightMap, (xCordStart + step), yCordStart, width, score, heightDifference);
         new Diamond().diamond(step, heightMap, xCordStart, (yCordStart - step), width, score, heightDifference);

@@ -8,7 +8,7 @@ import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 public class MapGenerator {
 
     public TerraNotaMap generateMap(int width, int height, int mapScale,
-                                    double heightDifference, int islandsModifier){
+                                    int heightDifference, int islandsModifier){
         var t = TerraNotaMap.builder()
                 .width(width)
                 .height(height)

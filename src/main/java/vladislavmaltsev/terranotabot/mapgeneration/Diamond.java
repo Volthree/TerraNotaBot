@@ -2,7 +2,7 @@ package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class Diamond {
     public void diamond(double step, double[][] heightMap, double xStartDia, double yStartDia,
-                        int fieldSize, double score, double heightDiff) {
+                        int fieldSize, double score, int heightDiff) {
         if(heightMap[(int) xStartDia][(int) yStartDia] ==0) {
 
             double hDia;

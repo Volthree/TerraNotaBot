@@ -22,7 +22,7 @@ public class BotContent {
     }
 
     public SendPhoto createSendPhoto(long chatId, int width, int height, int mapScale,
-                                     double heightDifference, int islandsModifier) {
+                                     int heightDifference, int islandsModifier) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
         TerraNotaMap terraNotaMap = mapGenerator.generateMap(width, height, mapScale, heightDifference, islandsModifier);

@@ -2,7 +2,7 @@ package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class Square {
     public void go(double score, double[][] heightMap, double baseX, double baseY,
-                   int fieldSize, int islandModifier, double heightDifference) {
+                   int fieldSize, int islandModifier, int heightDifference) {
         double step = fieldSize / score;
         double heightTemp;
         double xcPlus = baseX + step;

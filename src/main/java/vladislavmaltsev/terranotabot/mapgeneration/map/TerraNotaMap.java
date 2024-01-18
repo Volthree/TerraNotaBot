@@ -15,7 +15,7 @@ public class TerraNotaMap {
     private int height;
     private int mapScale;
     private MapCell[][] mapCells;
-    private double heightDifference;
+    private int heightDifference;
     private int islandsModifier;
 
     public void generate() {

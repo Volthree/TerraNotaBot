@@ -3,8 +3,10 @@ package vladislavmaltsev.terranotabot.service;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum.*;
@@ -18,6 +20,12 @@ public class Bottons {
         var i = new InlineKeyboardButton();
         i.setText(setText);
         i.setCallbackData(button.toString());
+        return i;
+    }
+    public InlineKeyboardButton createButtonFromString(String setText, String button) {
+        var i = new InlineKeyboardButton();
+        i.setText(setText);
+        i.setCallbackData(button);
         return i;
     }
     public InlineKeyboardMarkup getSizeButtons() {
@@ -90,6 +98,21 @@ public class Bottons {
         var rowsButton = List.of(
                 row1Button,
                 row2Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
+    public InlineKeyboardMarkup getLastMapButton(UserParameters userParameters) {
+
+        var row1Button = List.of(
+                createButton(
+                        userParameters.getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                + " h: "
+                                + userParameters.hashCode(), X_1)
+        );
+        var rowsButton = List.of(
+                row1Button
         );
         var inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowsButton);

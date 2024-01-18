@@ -3,6 +3,7 @@ package vladislavmaltsev.terranotabot.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
@@ -11,10 +12,13 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import vladislavmaltsev.terranotabot.annotations.LogAnn;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
+import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -22,46 +26,41 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final TelegramBotConfig telegramBotConfig;
     private final Bottons bottons;
     private final BotContent botContent;
+    private final UserParametersRepository userParametersRepository;
     private final List<UserParameters> userParametersList = new ArrayList<>();
 
     @Autowired
-    public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig, Bottons bottons, BotContent botContent) {
+    public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig, Bottons bottons, BotContent botContent, UserParametersRepository userParametersRepository) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottons = bottons;
         this.botContent = botContent;
+        this.userParametersRepository = userParametersRepository;
     }
 
     @Override
     @LogAnn
+    @Transactional
     public void onUpdateReceived(Update update) {
         SendMessage sendMessage = null;
         SendPhoto sendPhoto = null;
+        UserParameters userParameters;
         if (update.hasMessage() && update.getMessage().hasText()) {
-            String message = update.getMessage().getText();
-
-            switch (message) {
+            switch (update.getMessage().getText()) {
                 case "/start", "/menu" ->{
                     sendMessage = botContent.createSendMessage(update);
                     sendMessage.setReplyMarkup(bottons.getMainButtons());
                 }
-
-                case "/generate" -> sendPhoto = botContent.createSendPhoto(
-                            update.getMessage().getChatId(),
-                            713, 713, 2, 9999, 10);
             }
             try {
                 if (sendMessage != null)
                     execute(sendMessage);
-                if (sendPhoto != null)
-                    execute(sendPhoto);
             } catch (Exception e) {
                 log.error("In first try 64 " + e.getMessage());
             }
         } else if (update.hasCallbackQuery()) {
             int messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-            UserParameters userParameters;
 
             var i = userParametersList.stream().filter(x -> x.getMessageId() == messageId).findFirst();
             if (i.isPresent()) {
@@ -70,6 +69,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             } else {
                 log.info("New UserParameters created");
                 userParameters = UserParameters.getDefaultWithUpdate(update, messageId, chatId);
+
                 userParametersList.add(userParameters);
             }
             String callbackData = update.getCallbackQuery().getData();
@@ -78,15 +78,32 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             EditMessageReplyMarkup replyMarkup = new EditMessageReplyMarkup();
             replyMarkup.setChatId(chatId);
             replyMarkup.setMessageId(messageId);
-
             switch (mainButton) {
                 case SIZE -> replyMarkup.setReplyMarkup(bottons.getSizeButtons());
                 case SCALE -> replyMarkup.setReplyMarkup(bottons.getScaleButtons());
                 case HEIGHT_DIFFERENCE -> replyMarkup.setReplyMarkup(bottons.getHeightDifferenceButtons());
                 case ISLANDS_MODIFIER -> replyMarkup.setReplyMarkup(bottons.getIslandsModifierButtons());
-                case GET_LAST_MAP -> {}
+                case GET_LAST_MAP -> {
+                    Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
+                    if(userPatamLastMapOptional.isPresent()){
+                        UserParameters lastMapUP = userPatamLastMapOptional.get();
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(lastMapUP));
+                    }
+
+                    }
                 case GET_PREVIOUS_MAP -> {}
                 case GENERATE -> {
+                    var userParametersToSave = UserParameters.builder()
+                            .updateId(update.getUpdateId())
+                            .messageId(messageId)
+                            .chatId(chatId)
+                            .mapSize(userParameters.getMapSize())
+                            .scale(userParameters.getScale())
+                            .heightDifference(userParameters.getHeightDifference())
+                            .islandsModifier(userParameters.getIslandsModifier())
+                            .username(update.getCallbackQuery().getFrom().getUserName())
+                            .localDateTime(LocalDateTime.now())
+                            .build();
                     sendPhoto = botContent.createSendPhoto(chatId,
                             userParameters.getMapSize(),
                             userParameters.getMapSize(),
@@ -94,6 +111,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                             userParameters.getHeightDifference(),
                             userParameters.getIslandsModifier());
                     replyMarkup.setReplyMarkup(bottons.getSizeButtons());
+                    userParametersRepository.save(userParametersToSave);
                 }
                 case SMALL -> {
                     userParameters.setMapSize(129);
