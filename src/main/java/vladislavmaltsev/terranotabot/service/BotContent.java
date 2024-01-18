@@ -15,7 +15,7 @@ import java.io.InputStream;
 public class BotContent {
     private final MapGenerator mapGenerator;
     private final ImageGenerator imageGenerator;
-
+    private TerraNotaMap terraNotaMap;
     public BotContent(MapGenerator mapGenerator, ImageGenerator imageGenerator) {
         this.mapGenerator = mapGenerator;
         this.imageGenerator = imageGenerator;
@@ -25,10 +25,14 @@ public class BotContent {
                                      int heightDifference, int islandsModifier) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
-        TerraNotaMap terraNotaMap = mapGenerator.generateMap(width, height, mapScale, heightDifference, islandsModifier);
+        terraNotaMap = mapGenerator.generateMap(width, height, mapScale, heightDifference, islandsModifier);
         InputStream terraImageIS = imageGenerator.generateImage(terraNotaMap);
         sendPhoto.setPhoto(new InputFile(terraImageIS, "myName"));
         return sendPhoto;
+    }
+
+    public TerraNotaMap getTerraNotaMap() {
+        return terraNotaMap;
     }
 
     public SendMessage createSendMessage(Update update) {

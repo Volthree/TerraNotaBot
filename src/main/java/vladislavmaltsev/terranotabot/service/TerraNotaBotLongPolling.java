@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import vladislavmaltsev.terranotabot.annotations.LogAnn;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
+import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
@@ -110,6 +111,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                             userParameters.getScale(),
                             userParameters.getHeightDifference(),
                             userParameters.getIslandsModifier());
+                    TerraNotaMap terraNotaMap = botContent.getTerraNotaMap();
                     replyMarkup.setReplyMarkup(bottons.getSizeButtons());
                     userParametersRepository.save(userParametersToSave);
                 }
