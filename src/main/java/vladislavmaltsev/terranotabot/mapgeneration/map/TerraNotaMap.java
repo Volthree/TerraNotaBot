@@ -17,18 +17,19 @@ public class TerraNotaMap {
     private MapCell[][] mapCells;
     private double heightDifference;
     private int islandsModifier;
+
     public void generate() {
-        HeightMap heightMap = new HeightMap();
-        double[][] doubles = new double[height][width];
+        double[][] heightMap = new double[height][width];
         Alignment alignment = new Alignment();
 
-        heightMap.generateHeightMap(width - 1, doubles, heightDifference, islandsModifier);
+        new HeightMap().generateHeightMap(width - 1, heightMap, heightDifference, islandsModifier);
+
         if (mapScale > 1)
-            alignment.alignmentMethod(doubles, width - 1, mapScale);
+            alignment.alignmentMethod(heightMap, width - 1, mapScale);
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                mapCells[x][y] = new MapCell((int) doubles[x][y]);
+                mapCells[x][y] = new MapCell((int) heightMap[x][y]);
             }
         }
 

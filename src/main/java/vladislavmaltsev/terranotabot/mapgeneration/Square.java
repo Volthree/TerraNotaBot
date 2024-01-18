@@ -1,23 +1,23 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class Square {
-    public void go(double score, double[][] array, double xCord, double yCord,
-                   double fieldSize, int v, double it, int islandModifier, double heightDifference) {
-        double g = fieldSize / score;
+    public void go(double score, double[][] heightMap, double baseX, double baseY,
+                   int fieldSize, int islandModifier, double heightDifference) {
+        double step = fieldSize / score;
         double heightTemp;
-        double xcPlus = xCord + g;
-        double xcMinus = xCord - g;
-        double ycPlus = yCord + g;
-        double ycMinus = yCord - g;
+        double xcPlus = baseX + step;
+        double xcMinus = baseX - step;
+        double ycPlus = baseY + step;
+        double ycMinus = baseY - step;
 
-        double rb = array[(int) xcPlus][(int) ycPlus];
-        double rt = array[(int) xcPlus][(int) ycMinus];
-        double lt = array[(int) xcMinus][(int) ycMinus];
-        double lb = array[(int) xcMinus][(int) ycPlus];
+        double rb = heightMap[(int) xcPlus][(int) ycPlus];
+        double rt = heightMap[(int) xcPlus][(int) ycMinus];
+        double lt = heightMap[(int) xcMinus][(int) ycMinus];
+        double lb = heightMap[(int) xcMinus][(int) ycPlus];
 
-        if (array[(int) xCord][(int) yCord] == 0) {
+        if (heightMap[(int) baseX][(int) baseY] == 0) {
             heightTemp = ((rb + rt + lt + lb) / 4) + Math.random() * islandModifier / score;
-            array[(int) xCord][(int) yCord] = heightTemp;
+            heightMap[(int) baseX][(int) baseY] = heightTemp;
         }
     }
 }

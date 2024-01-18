@@ -1,8 +1,10 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
+import org.springframework.stereotype.Component;
 import vladislavmaltsev.terranotabot.mapgeneration.map.MapCell;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 
+@Component
 public class MapGenerator {
 
     public TerraNotaMap generateMap(int width, int height, int mapScale,

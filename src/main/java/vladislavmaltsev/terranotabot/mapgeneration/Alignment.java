@@ -27,22 +27,35 @@ public class Alignment {
                 count = -1;
             }
         }
-        double minValue = array[0][0];
-        for (int wh = 0; wh <= poleSize - cellSize; wh = wh + cellSize) {
-            for (int hh = 0; hh <= poleSize - cellSize; hh = hh + cellSize) {
-                if (array[wh][hh] < minValue) {
-                    minValue = array[wh][hh];
-                }
-            }
-        }
-        System.out.println("Min value in Alignment " + minValue);
+//        double minValue = array[0][0];
+//        for (int wh = 0; wh <= poleSize - cellSize; wh = wh + cellSize) {
+//            for (int hh = 0; hh <= poleSize - cellSize; hh = hh + cellSize) {
+//                if (array[wh][hh] < minValue) {
+//                    minValue = array[wh][hh];
+//                }
+//            }
+//        }
+//        System.out.println("Min value in Alignment " + minValue);
 //        if (minValue < 0) {
 //            minValue = Math.abs(minValue);
-//
 //            for (int wh = 0; wh <= poleSize - cellSize; wh = wh + cellSize) {
 //                for (int hh = 0; hh <= poleSize - cellSize; hh = hh + cellSize) {
 //                    array[wh][hh] = array[wh][hh] + minValue;
 //                }
+//            }
+//        }
+//        double maxValue = -99999;
+//        for (int wh = 0; wh <= poleSize - cellSize; wh = wh + cellSize) {
+//            for (int hh = 0; hh <= poleSize - cellSize; hh = hh + cellSize) {
+//                if (array[wh][hh] > maxValue) {
+//                    maxValue = array[wh][hh];
+//                }
+//            }
+//        }
+//        double coef = maxValue/13;
+//        for (int wh = 0; wh <= poleSize - cellSize; wh = wh + cellSize) {
+//            for (int hh = 0; hh <= poleSize - cellSize; hh = hh + cellSize) {
+//                array[wh][hh] = array[wh][hh] * coef;
 //            }
 //        }
     }

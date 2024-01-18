@@ -27,9 +27,9 @@ public class TelegramBotLongPollingAspect {
 
         for (Update update : updateList) {
             if (update.hasMessage())
-                log.info("Update messages: " + update.getMessage().getText());
+                log.info("Update messages: {} in UpdateId {}", update.getMessage().getText(), update.getUpdateId());
             else
-                log.info("Update without message");
+                log.info("Update without message in {}", update.getUpdateId());
         }
     }
 }

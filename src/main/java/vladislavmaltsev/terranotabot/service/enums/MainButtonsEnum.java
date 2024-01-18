@@ -1,6 +1,6 @@
 package vladislavmaltsev.terranotabot.service.enums;
 
-public enum MainButtons {
+public enum MainButtonsEnum {
     SIZE("sizeButton"),
     SCALE("scaleButton"),
     HEIGHT_DIFFERENCE("heightDifferenceButton"),
@@ -27,7 +27,7 @@ public enum MainButtons {
 
     private final String value;
 
-    MainButtons(String value) {
+    MainButtonsEnum(String value) {
         this.value = value;
     }
 

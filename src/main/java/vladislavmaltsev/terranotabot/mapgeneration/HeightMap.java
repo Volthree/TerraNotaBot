@@ -1,95 +1,84 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 public class HeightMap {
-    public void generateHeightMap(double poleSize, double[][] array,
+    public void generateHeightMap(int width, double[][] heightMap,
                                   double heightDifference, int islandsModifier) {
         double score = 1;
-        double g = poleSize / score;
-        double terra = 1;
-        double xCord;
-        double yCord;
-        double xCordStart;
-        double yCordStart;
-        double coefficientStepX;
-        double coefficientStepY;
-        int heights = 1;
-        array[0][0] = Math.random() * 10;
-        array[(int) poleSize][0] = Math.random() * 10;
-        array[0][(int) poleSize] = Math.random() * 10;
-        array[(int) poleSize][(int) poleSize] = Math.random() * 10;
+        double step = width / score;
+        double dX;
+        double dY;
+        double baseX;
+        double baseY;
+        double stepX;
+        double stepY;
+        heightMap[0][0] = Math.random() * 10;
+        heightMap[width][0] = Math.random() * 10;
+        heightMap[0][width] = Math.random() * 10;
+        heightMap[width][width] = Math.random() * 10;
 
         for (int num = 1; num < 13; num++) {
             if (score == 1) {
-
-                xCordStart = (poleSize / (score * 2));
-                yCordStart = (poleSize / (score * 2));
-                if (0 <= yCordStart && yCordStart <= poleSize && 0 <= xCordStart && xCordStart <= poleSize) {
+                baseX = (width / (score * 2));
+                baseY = (width / (score * 2));
+                if (0 <= baseY && baseY <= width && 0 <= baseX && baseX <= width) {
                     score = 2;
-                    g = poleSize / score;
+                    step = width / score;
                     Square center = new Square();
-                    center.go(score, array, xCordStart, yCordStart, poleSize, heights, terra, islandsModifier, heightDifference);
+                    center.go(score, heightMap, baseX, baseY, width, islandsModifier, heightDifference);
                 }
 
-                Diamond d1 = new Diamond();
-                d1.diamond(g, array, (xCordStart - g), yCordStart, poleSize, score, heightDifference);
-                Diamond d2 = new Diamond();
-                d2.diamond(g, array, (xCordStart + g), yCordStart, poleSize, score, heightDifference);
-                Diamond d3 = new Diamond();
-                d3.diamond(g, array, xCordStart, (yCordStart - g), poleSize, score, heightDifference);
-                Diamond d4 = new Diamond();
-                d4.diamond(g, array, xCordStart, (yCordStart + g), poleSize, score, heightDifference);
+                getDiamond(width, heightMap, heightDifference, score, step, baseX, baseY);
 
             } else {
-                xCordStart = (poleSize / (score * 2));
-                xCord = xCordStart;
-                yCordStart = (poleSize / (score * 2));
+                baseX = (width / (score * 2));
+                dX = baseX;
+                baseY = (width / (score * 2));
 
-                coefficientStepX = 0;
+                stepX = 0;
                 for (int num1 = 1; num1 <= score; num1++) {
-                    yCord = yCordStart;
-                    xCord = xCord + coefficientStepX;
-                    coefficientStepY = 0;
+                    dY = baseY;
+                    dX = dX + stepX;
+                    stepY = 0;
                     for (int num2 = 1; num2 <= score; num2++) {
-                        if (0 <= yCord && yCord <= poleSize && 0 <= xCord && xCord <= poleSize) {
-                            yCord = yCord + coefficientStepY;
+                        if (0 <= dY && dY <= width && 0 <= dX && dX <= width) {
+                            dY = dY + stepY;
                             Square sq = new Square();
-                            sq.go((score * 2), array, xCord, yCord, poleSize, heights, (terra), islandsModifier, heightDifference);
-                            coefficientStepY = poleSize / score;
+                            sq.go((score * 2), heightMap, dX, dY, width, islandsModifier, heightDifference);
+                            stepY = width / score;
                         }
                     }
-                    coefficientStepX = poleSize / score;
+                    stepX = width / score;
                 }
-                xCordStart = (poleSize / (score * 2));
-                xCord = xCordStart;
-                yCordStart = (poleSize / (score * 2));
+                baseX = (width / (score * 2));
+                dX = baseX;
+                baseY = (width / (score * 2));
 
-                coefficientStepX = 0;
+                stepX = 0;
                 for (int num1 = 1; num1 <= score; num1++) {
-                    g = poleSize / (score * 2);
-                    yCord = yCordStart;
-                    xCord = xCord + coefficientStepX;
-                    coefficientStepY = 0;
+                    step = width / (score * 2);
+                    dY = baseY;
+                    dX = dX + stepX;
+                    stepY = 0;
                     for (int num2 = 1; num2 <= score; num2++) {
-                        if (0 <= yCord && yCord <= poleSize && 0 <= xCord && xCord <= poleSize) {
-                            yCord = yCord + coefficientStepY;
-                            Diamond d1 = new Diamond();
-                            d1.diamond(g, array, (xCord - g), yCord, poleSize, score, heightDifference);
-                            Diamond d2 = new Diamond();
-                            d2.diamond(g, array, (xCord + g), yCord, poleSize, score, heightDifference);
-                            Diamond d3 = new Diamond();
-                            d3.diamond(g, array, xCord, (yCord - g), poleSize, score, heightDifference);
-                            Diamond d4 = new Diamond();
-                            d4.diamond(g, array, xCord, (yCord + g), poleSize, score, heightDifference);
-                            coefficientStepY = poleSize / score;
+                        if (0 <= dY && dY <= width && 0 <= dX && dX <= width) {
+                            dY = dY + stepY;
+                            getDiamond(width, heightMap, heightDifference, score, step, dX, dY);
+                            stepY = width / score;
                         }
                     }
-                    coefficientStepX = poleSize / score;
+                    stepX = width / score;
                 }
                 score = (score * 2);
-                terra = terra + 3;
             }
 
         }
+    }
+
+    private void getDiamond(int width, double[][] heightMap, double heightDifference, double score, double step, double xCordStart, double yCordStart) {
+        new Diamond().diamond(step, heightMap, (xCordStart - step), yCordStart, width, score, heightDifference);
+        new Diamond().diamond(step, heightMap, (xCordStart + step), yCordStart, width, score, heightDifference);
+        new Diamond().diamond(step, heightMap, xCordStart, (yCordStart - step), width, score, heightDifference);
+        new Diamond().diamond(step, heightMap, xCordStart, (yCordStart + step), width, score, heightDifference);
     }
 
 }
