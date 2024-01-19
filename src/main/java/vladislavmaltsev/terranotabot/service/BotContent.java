@@ -38,6 +38,16 @@ public class BotContent {
         }
         return sendPhoto;
     }
+    public MapHeights changeMapHeights(MapHeights mapHeights, int value){
+        int[][] array = mapHeights.getArrayHeights();
+        for(int x = 0; x < array.length; x++){
+            for (int y = 0; y < array[x].length; y++){
+                array[x][y] = array[x][y] + value;
+            }
+        }
+        mapHeights.setArrayHeights(array);
+        return mapHeights;
+    }
     public SendPhoto getExistedPhoto(long chatId, MapHeights mapHeights, UserParameters userParameters){
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
@@ -56,6 +66,7 @@ public class BotContent {
         return sendPhoto;
     }
 
+
     public TerraNotaMap getTerraNotaMap() {
         return terraNotaMap;
     }
@@ -63,7 +74,13 @@ public class BotContent {
     public SendMessage createSendMessage(Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId());
-        sendMessage.setText("Choose generation properties");
+        sendMessage.setText("This is map generation bot! " +
+                "Choose parameters " +
+                "'Map size' for picture size, " +
+                "'Scale' for pixel-style, " +
+                "'Height difference' and 'Islands modifier' " +
+                ", then GENERATE. " +
+                "You can 'Get last map' for changing water filling on last created map.");
         return sendMessage;
     }
 }

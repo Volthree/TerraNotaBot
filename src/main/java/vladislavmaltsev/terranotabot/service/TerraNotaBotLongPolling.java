@@ -16,7 +16,6 @@ import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.MapHeightsRepository;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
-import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         UserParameters userParameters;
         if (update.hasMessage() && update.getMessage().hasText()) {
             switch (update.getMessage().getText()) {
-                case "/start", "/menu" ->{
+                case "/start", "/menu" -> {
                     sendMessage = botContent.createSendMessage(update);
                     sendMessage.setReplyMarkup(bottons.getMainButtons());
                 }
@@ -94,7 +93,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 case "Get last map" -> {
                     Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
                     replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
-                    }
+                }
                 case "Get previous map" -> {
                     List<UserParameters> userPatamListPreviousMaps = userParametersRepository.findByChatId(chatId);
                     replyMarkup.setReplyMarkup(bottons.getPreviousMapsButton(userPatamListPreviousMaps));
@@ -179,19 +178,70 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                     log.info(userParameters.toString());
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
+                case "back to map" -> {
+
+                }
                 default -> {
-                    var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
-                    Optional<MapHeights> map = null;
-                    if(usersParamByMapId.isPresent())
-                     map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
-//                    sendPhoto = botContent.createSendPhoto(chatId,
-//                            userParameters.getMapSize(),
-//                            userParameters.getMapSize(),
-//                            userParameters.getScale(),
-//                            userParameters.getHeightDifference(),
-//                            userParameters.getIslandsModifier());
-                    sendPhoto = botContent.getExistedPhoto(chatId, map.orElse(null), usersParamByMapId.orElse(null));
-                    replyMarkup.setReplyMarkup(bottons.getMainButtons());
+                    if (callbackData.contains("get map ")) {
+                        callbackData = callbackData.substring("get map ".length()).trim();
+                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        Optional<MapHeights> map = Optional.empty();
+                        if (usersParamByMapId.isPresent())
+                            map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+                        sendPhoto = botContent.getExistedPhoto(chatId, map.orElse(null), usersParamByMapId.orElse(null));
+                        Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
+                    }
+                    else if (callbackData.contains("back to map ")) {
+                        replyMarkup.setReplyMarkup(bottons.getMainButtons());
+                    }
+                    else if(callbackData.contains("control water level ")){
+                        callbackData = callbackData.substring("control water level ".length()).trim();
+                        replyMarkup.setReplyMarkup(bottons.getControlWaterLevelBottons(callbackData));
+                    }
+                    else if(callbackData.contains("Water level +1 ")){
+                        callbackData = callbackData.substring("Water level +1 ".length()).trim();
+                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        Optional<MapHeights> map = Optional.empty();
+                        if (usersParamByMapId.isPresent())
+                            map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+                        MapHeights changedMapHeights = botContent.changeMapHeights(map.orElse(null), -1);
+                        mapHeightsRepository.save(changedMapHeights);
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
+                    }
+                    else if(callbackData.contains("Water level -1 ")){
+                        callbackData = callbackData.substring("Water level -1 ".length()).trim();
+                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        Optional<MapHeights> map = Optional.empty();
+                        if (usersParamByMapId.isPresent())
+                            map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+                        MapHeights changedMapHeights = botContent.changeMapHeights(map.orElse(null), 1);
+                        mapHeightsRepository.save(changedMapHeights);
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
+                    }
+                    else if(callbackData.contains("Water level +5 ")){
+                        callbackData = callbackData.substring("Water level +5 ".length()).trim();
+                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        Optional<MapHeights> map = Optional.empty();
+                        if (usersParamByMapId.isPresent())
+                            map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+                        MapHeights changedMapHeights = botContent.changeMapHeights(map.orElse(null), -5);
+                        mapHeightsRepository.save(changedMapHeights);
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
+                    }
+                    else if(callbackData.contains("Water level -5 ")){
+                        callbackData = callbackData.substring("Water level -5 ".length()).trim();
+                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        Optional<MapHeights> map = Optional.empty();
+                        if (usersParamByMapId.isPresent())
+                            map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+                        MapHeights changedMapHeights = botContent.changeMapHeights(map.orElse(null), 5);
+                        mapHeightsRepository.save(changedMapHeights);
+                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
+                    }
+                    else {
+                        replyMarkup.setReplyMarkup(bottons.getMapManipulationButtons(callbackData));
+                    }
                 }
             }
             try {
@@ -206,18 +256,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             }
         }
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
     @Override

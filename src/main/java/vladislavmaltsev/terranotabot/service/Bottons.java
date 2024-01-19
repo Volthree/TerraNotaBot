@@ -110,8 +110,8 @@ public class Bottons {
             var row1Button = List.of(
                     createButtonFromString(
                             userParameters.get().getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                                    + " h: "
-                                    + userParameters.hashCode(), userParameters.get().getMapid())
+                                    + " : edit or get existed map",
+                            userParameters.get().getMapid())
             );
             rowsButton.add(row1Button);
         }
@@ -126,8 +126,53 @@ public class Bottons {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup getMapManipulationButtons(String callBackData) {
+
+        var row1Button = List.of(
+                createButton("control water level", "control water level " + callBackData)
+        );
+        var row2Button = List.of(
+                createButton("get map", "get map " + callBackData)
+
+        );
+        var row3Button = List.of(
+                createButton("back", "back")
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button,
+                row3Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup getControlWaterLevelBottons(String callBackData) {
+
+        var row1Button = List.of(
+                createButton("Water level +1", "Water level +1 " + callBackData),
+                createButton("Water level -1", "Water level -1 "  + callBackData)
+        );
+        var row2Button = List.of(
+                createButton("Water level +5", "Water level +5 "  + callBackData),
+                createButton("Water level -5", "Water level -5 "  + callBackData)
+
+        );
+        var row3Button = List.of(
+                createButton("back to map", "back to manipulation map")
+        );
+        var rowsButton = List.of(
+                row1Button,
+                row2Button,
+                row3Button
+        );
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup getPreviousMapsButton(List<UserParameters> userParametersList) {
-        System.out.println("START getPreviousMapsButton");
         List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
         for (UserParameters u : userParametersList) {
             rowsButton.add(
@@ -163,8 +208,8 @@ public class Bottons {
 
         );
         var row3Button = List.of(
-                createButton("Get last map", "Get last map"),
-                createButton("Get previous map", "Get previous map")
+                createButton("Get last map", "Get last map")
+//                , createButton("Get previous map", "Get previous map")
 
         );
         var row4Button = List.of(
