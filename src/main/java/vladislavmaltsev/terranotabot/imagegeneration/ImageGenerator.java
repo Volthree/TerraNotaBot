@@ -21,7 +21,7 @@ public class ImageGenerator {
         BufferedImage image = new BufferedImage(terraNotaMap.getWidth(), terraNotaMap.getHeight(), BufferedImage.TYPE_INT_RGB);
         for (int x = 0; x < terraNotaMap.getWidth(); x++) {
             for (int y = 0; y < terraNotaMap.getHeight(); y++) {
-                image.setRGB(x, y, defineColor(terraNotaMap.getMapCells()[x][y].getHeight()).getRGB());
+                image.setRGB(x, y, defineColor(terraNotaMap.getMapHeights().getArrayHeights()[x][y]).getRGB());
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

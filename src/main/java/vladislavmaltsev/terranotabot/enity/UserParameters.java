@@ -38,6 +38,8 @@ public class UserParameters {
     private String username;
     @Column(name = "date")
     private LocalDateTime localDateTime;
+    @Column(name = "mapid")
+    private String mapid;
 
     public static UserParameters getDefaultWithUpdate(Update update, int messageId, long chatId){
         return UserParameters.builder()

@@ -4,39 +4,39 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
-import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
-
-import static vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum.*;
-import static vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum.BACK;
+import java.util.Optional;
 
 @Service
 public class Bottons {
 
 
-    public InlineKeyboardButton createButton(String setText, MainButtonsEnum button) {
+    public InlineKeyboardButton createButton(String setText, String buttonName) {
         var i = new InlineKeyboardButton();
         i.setText(setText);
-        i.setCallbackData(button.toString());
+        i.setCallbackData(buttonName);
         return i;
     }
+
     public InlineKeyboardButton createButtonFromString(String setText, String button) {
         var i = new InlineKeyboardButton();
         i.setText(setText);
         i.setCallbackData(button);
         return i;
     }
+
     public InlineKeyboardMarkup getSizeButtons() {
 
         var row1Button = List.of(
-                createButton("Small", SMALL),
-                createButton("Medium", MEDIUM),
-                createButton("Large", LARGE)
+                createButton("Small", "Small"),
+                createButton("Medium", "Medium"),
+                createButton("Large", "Large")
         );
         var row2Button = List.of(
-                createButton("back", BACK)
+                createButton("back", "back")
         );
         var rowsButton = List.of(
                 row1Button,
@@ -50,12 +50,12 @@ public class Bottons {
     public InlineKeyboardMarkup getHeightDifferenceButtons() {
 
         var row1Button = List.of(
-                createButton("Smooth", SMOOTH),
-                createButton("Hill", HILL),
-                createButton("Mountain", MOUNTAIN)
+                createButton("Smooth", "Smooth"),
+                createButton("Hill", "Hill"),
+                createButton("Mountain", "Mountain")
         );
         var row2Button = List.of(
-                createButton("back", BACK)
+                createButton("back", "back")
         );
         var rowsButton = List.of(
                 row1Button,
@@ -69,12 +69,12 @@ public class Bottons {
     public InlineKeyboardMarkup getIslandsModifierButtons() {
 
         var row1Button = List.of(
-                createButton("Islands", ISLANDS),
-                createButton("Backwater", BLACKWATER),
-                createButton("Continent", CONTINENT)
+                createButton("Islands", "Islands"),
+                createButton("Backwater", "Backwater"),
+                createButton("Continent", "Continent")
         );
         var row2Button = List.of(
-                createButton("back", BACK)
+                createButton("back", "back")
         );
         var rowsButton = List.of(
                 row1Button,
@@ -88,12 +88,12 @@ public class Bottons {
     public InlineKeyboardMarkup getScaleButtons() {
 
         var row1Button = List.of(
-                createButton("x1", X_1),
-                createButton("x2", X_2),
-                createButton("x4", X_4)
+                createButton("x1", "x1"),
+                createButton("x2", "x2"),
+                createButton("x4", "x4")
         );
         var row2Button = List.of(
-                createButton("back", BACK)
+                createButton("back", "back")
         );
         var rowsButton = List.of(
                 row1Button,
@@ -103,17 +103,49 @@ public class Bottons {
         inlineKeyboardMarkup.setKeyboard(rowsButton);
         return inlineKeyboardMarkup;
     }
-    public InlineKeyboardMarkup getLastMapButton(UserParameters userParameters) {
 
-        var row1Button = List.of(
-                createButton(
-                        userParameters.getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
-                                + " h: "
-                                + userParameters.hashCode(), X_1)
+    public InlineKeyboardMarkup getLastMapButton(Optional<UserParameters> userParameters) {
+        List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
+        if (userParameters.isPresent()) {
+            var row1Button = List.of(
+                    createButtonFromString(
+                            userParameters.get().getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                    + " h: "
+                                    + userParameters.hashCode(), userParameters.get().getMapid())
+            );
+            rowsButton.add(row1Button);
+        }
+
+        var row2Button = List.of(
+                createButton("back", "back")
         );
-        var rowsButton = List.of(
-                row1Button
+        rowsButton.add(row2Button);
+
+        var inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(rowsButton);
+        return inlineKeyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup getPreviousMapsButton(List<UserParameters> userParametersList) {
+        System.out.println("START getPreviousMapsButton");
+        List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
+        for (UserParameters u : userParametersList) {
+            rowsButton.add(
+                    List.of(
+                            createButtonFromString(
+                                    u.getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                                            + " h: "
+                                            + u.hashCode(),
+                                    u.getMapid()
+                            )
+                    )
+            );
+        }
+        var row2Button = List.of(
+                createButton("back", "back")
         );
+        rowsButton.add(row2Button);
+
         var inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(rowsButton);
         return inlineKeyboardMarkup;
@@ -122,21 +154,21 @@ public class Bottons {
     public InlineKeyboardMarkup getMainButtons() {
 
         var row1Button = List.of(
-                createButton("Map size", SIZE),
-                createButton("Scale", SCALE)
+                createButton("Map size", "Map size"),
+                createButton("Scale", "Scale")
         );
         var row2Button = List.of(
-                createButton("Height difference", HEIGHT_DIFFERENCE),
-                createButton("Islands modifier", ISLANDS_MODIFIER)
+                createButton("Height difference", "Height difference"),
+                createButton("Islands modifier", "Islands modifier")
 
         );
         var row3Button = List.of(
-                createButton("Get last map", GET_LAST_MAP),
-                createButton("Get previous map", GET_PREVIOUS_MAP)
+                createButton("Get last map", "Get last map"),
+                createButton("Get previous map", "Get previous map")
 
         );
         var row4Button = List.of(
-                createButton("Generate", GENERATE)
+                createButton("Generate", "Generate")
 
         );
         var rowsButton = List.of(

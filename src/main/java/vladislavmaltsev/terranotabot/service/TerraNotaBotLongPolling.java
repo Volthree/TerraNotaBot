@@ -11,8 +11,10 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.objects.Update;
 import vladislavmaltsev.terranotabot.annotations.LogAnn;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
+import vladislavmaltsev.terranotabot.enity.MapHeights;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
+import vladislavmaltsev.terranotabot.repository.MapHeightsRepository;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 import vladislavmaltsev.terranotabot.service.enums.MainButtonsEnum;
 
@@ -28,15 +30,21 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final Bottons bottons;
     private final BotContent botContent;
     private final UserParametersRepository userParametersRepository;
+
+    private final MapHeightsRepository mapHeightsRepository;
     private final List<UserParameters> userParametersList = new ArrayList<>();
 
     @Autowired
-    public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig, Bottons bottons, BotContent botContent, UserParametersRepository userParametersRepository) {
+    public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
+                                   Bottons bottons, BotContent botContent,
+                                   UserParametersRepository userParametersRepository,
+                                   MapHeightsRepository mapHeightsRepository) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottons = bottons;
         this.botContent = botContent;
         this.userParametersRepository = userParametersRepository;
+        this.mapHeightsRepository = mapHeightsRepository;
     }
 
     @Override
@@ -62,7 +70,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         } else if (update.hasCallbackQuery()) {
             int messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
-
+            EditMessageReplyMarkup replyMarkup = new EditMessageReplyMarkup();
             var i = userParametersList.stream().filter(x -> x.getMessageId() == messageId).findFirst();
             if (i.isPresent()) {
                 log.info("Getting existed UserParameters");
@@ -74,26 +82,35 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 userParametersList.add(userParameters);
             }
             String callbackData = update.getCallbackQuery().getData();
-            MainButtonsEnum mainButton = MainButtonsEnum.valueOf(callbackData);
-            log.info("Pressed button " + mainButton);
-            EditMessageReplyMarkup replyMarkup = new EditMessageReplyMarkup();
+            log.error("CallBackData " + callbackData);
+//            MainButtonsEnum mainButton = MainButtonsEnum.valueOf(callbackData);
             replyMarkup.setChatId(chatId);
             replyMarkup.setMessageId(messageId);
-            switch (mainButton) {
-                case SIZE -> replyMarkup.setReplyMarkup(bottons.getSizeButtons());
-                case SCALE -> replyMarkup.setReplyMarkup(bottons.getScaleButtons());
-                case HEIGHT_DIFFERENCE -> replyMarkup.setReplyMarkup(bottons.getHeightDifferenceButtons());
-                case ISLANDS_MODIFIER -> replyMarkup.setReplyMarkup(bottons.getIslandsModifierButtons());
-                case GET_LAST_MAP -> {
+            switch (callbackData) {
+                case "Map size" -> replyMarkup.setReplyMarkup(bottons.getSizeButtons());
+                case "Scale" -> replyMarkup.setReplyMarkup(bottons.getScaleButtons());
+                case "Height difference" -> replyMarkup.setReplyMarkup(bottons.getHeightDifferenceButtons());
+                case "Islands modifier" -> replyMarkup.setReplyMarkup(bottons.getIslandsModifierButtons());
+                case "Get last map" -> {
                     Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
-                    if(userPatamLastMapOptional.isPresent()){
-                        UserParameters lastMapUP = userPatamLastMapOptional.get();
-                        replyMarkup.setReplyMarkup(bottons.getLastMapButton(lastMapUP));
+                    replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
                     }
+                case "Get previous map" -> {
+                    List<UserParameters> userPatamListPreviousMaps = userParametersRepository.findByChatId(chatId);
+                    replyMarkup.setReplyMarkup(bottons.getPreviousMapsButton(userPatamListPreviousMaps));
+//                    replyMarkup.setReplyMarkup(bottons.getSizeButtons());
+                    System.out.println("AFTER REPLY MARKUP");
+                }
+                case "Generate" -> {
+                    sendPhoto = botContent.createSendPhoto(chatId,
+                            userParameters.getMapSize(),
+                            userParameters.getMapSize(),
+                            userParameters.getScale(),
+                            userParameters.getHeightDifference(),
+                            userParameters.getIslandsModifier());
+                    TerraNotaMap terraNotaMap = botContent.getTerraNotaMap();
+                    MapHeights s = mapHeightsRepository.save(terraNotaMap.getMapHeights());
 
-                    }
-                case GET_PREVIOUS_MAP -> {}
-                case GENERATE -> {
                     var userParametersToSave = UserParameters.builder()
                             .updateId(update.getUpdateId())
                             .messageId(messageId)
@@ -104,70 +121,78 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                             .islandsModifier(userParameters.getIslandsModifier())
                             .username(update.getCallbackQuery().getFrom().getUserName())
                             .localDateTime(LocalDateTime.now())
+                            .mapid(s.getId())
                             .build();
-                    sendPhoto = botContent.createSendPhoto(chatId,
-                            userParameters.getMapSize(),
-                            userParameters.getMapSize(),
-                            userParameters.getScale(),
-                            userParameters.getHeightDifference(),
-                            userParameters.getIslandsModifier());
-                    TerraNotaMap terraNotaMap = botContent.getTerraNotaMap();
+
                     replyMarkup.setReplyMarkup(bottons.getSizeButtons());
                     userParametersRepository.save(userParametersToSave);
                 }
-                case SMALL -> {
+                case "Small" -> {
                     userParameters.setMapSize(129);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case MEDIUM -> {
+                case "Medium" -> {
                     userParameters.setMapSize(513);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case LARGE -> {
+                case "Large" -> {
                     userParameters.setMapSize(713);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case X_1 -> {
+                case "x1" -> {
                     userParameters.setScale(1);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case X_2 -> {
+                case "x2" -> {
                     userParameters.setScale(2);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case X_4 -> {
+                case "x4" -> {
                     userParameters.setScale(4);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case SMOOTH -> {
+                case "Smooth" -> {
                     userParameters.setHeightDifference(2);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case HILL -> {
+                case "Hill" -> {
                     userParameters.setHeightDifference(4);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case MOUNTAIN -> {
+                case "Mountain" -> {
                     userParameters.setHeightDifference(9);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case ISLANDS -> {
+                case "Islands" -> {
                     userParameters.setIslandsModifier(1);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case BLACKWATER -> {
+                case "Backwater" -> {
                     userParameters.setIslandsModifier(10);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case CONTINENT -> {
+                case "Continent" -> {
                     userParameters.setIslandsModifier(40);
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                case BACK -> {
+                case "back" -> {
                     log.info(userParameters.toString());
                     replyMarkup.setReplyMarkup(bottons.getMainButtons());
                 }
-                default -> {}
+                default -> {
+                    var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                    Optional<MapHeights> map = null;
+                    if(usersParamByMapId.isPresent())
+                     map = mapHeightsRepository.findById(usersParamByMapId.get().getMapid());
+//                    sendPhoto = botContent.createSendPhoto(chatId,
+//                            userParameters.getMapSize(),
+//                            userParameters.getMapSize(),
+//                            userParameters.getScale(),
+//                            userParameters.getHeightDifference(),
+//                            userParameters.getIslandsModifier());
+                    sendPhoto = botContent.getExistedPhoto(chatId, map.orElse(null), usersParamByMapId.orElse(null));
+                    replyMarkup.setReplyMarkup(bottons.getMainButtons());
+                }
             }
             try {
                 if (sendPhoto != null) {

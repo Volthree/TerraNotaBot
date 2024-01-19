@@ -23,4 +23,9 @@ public interface UserParametersRepository extends JpaRepository<UserParameters, 
             "and u.localDateTime = " +
             "(select MAX(u2.localDateTime) from UserParameters u2)")
     Optional<UserParameters> findByChatIdAndMaxDate(@Param("chat") long chatId);
+
+    Optional<UserParameters> findByMapid(String mapId);
+
+    List<UserParameters> findByChatId(long chatId);
+
 }
