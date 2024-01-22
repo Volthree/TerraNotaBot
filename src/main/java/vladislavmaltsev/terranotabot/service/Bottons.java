@@ -196,19 +196,19 @@ public class Bottons {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getMainButtons() {
+    public InlineKeyboardMarkup getMainButtons(UserParameters userParameters) {
 
         var row1Button = List.of(
-                createButton("Map size", "Map size"),
-                createButton("Scale", "Scale")
+                createButton("Map size "+ (userParameters !=null ? userParameters.getMapSizeInString() : ""), "Map size"),
+                createButton("Scale "+ (userParameters !=null ? userParameters.getScaleInString() : ""), "Scale")
         );
         var row2Button = List.of(
-                createButton("Height difference", "Height difference"),
-                createButton("Islands modifier", "Islands modifier")
+                createButton("Height difference "+(userParameters !=null ? userParameters.getHeightDifferenceInString() : ""), "Height difference"),
+                createButton("Islands modifier "+(userParameters !=null ? userParameters.getIslandModifierInString() : ""), "Islands modifier")
 
         );
         var row3Button = List.of(
-                createButton("Get last map", "Get last map")
+                createButton("Get last map ", "Get last map")
 //                , createButton("Get previous map", "Get previous map")
 
         );

@@ -82,7 +82,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                     TerraNotaMap t = terraNotaMapReporitory.save(botContent.getTerraNotaMap());
                     setUsernameDateMapId(up, update, t);
                     userParametersRepository.save(up);
-                    replyMarkup.setReplyMarkup(bottons.getSizeButtons());
+                    replyMarkup.setReplyMarkup(bottons.getLastMapButton(Optional.of(up)));
                 }
                 case "Small" -> {
                     userParameters.setMapSize(129);
@@ -132,7 +132,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                     userParameters.setIslandsModifier(40);
                     updateProcess(userParametersRepository, replyMarkup, userParameters);
                 }
-                case "back" -> replyMarkup.setReplyMarkup(bottons.getMainButtons());
+                case "back" -> replyMarkup.setReplyMarkup(bottons.getMainButtons(userParameters));
 
                 default -> {
                     if (callbackData.contains("get map ")) {
@@ -163,7 +163,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                         setReplyMarkupUpdateData(callbackData, replyMarkup, +5, "Water level -5 ", sendPhoto, chatId);
                     }
                     else if (callbackData.contains("back to map ")) {
-                        replyMarkup.setReplyMarkup(bottons.getMainButtons());
+                        replyMarkup.setReplyMarkup(bottons.getMainButtons(userParameters));
                     }
                     else if(callbackData.contains("control water level ")){
                         callbackData = callbackData.substring("control water level ".length()).trim();
@@ -208,7 +208,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                                EditMessageReplyMarkup replyMarkup,
                                UserParameters userParameters) {
         userParametersRepository.save(userParameters);
-        replyMarkup.setReplyMarkup(bottons.getMainButtons());
+        replyMarkup.setReplyMarkup(bottons.getMainButtons(userParameters));
     }
 
     private void setUsernameDateMapId(UserParameters up, Update update, TerraNotaMap t) {
@@ -239,11 +239,11 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
 
     private void createSendMessage(Update update){
         SendMessage sendMessage = botContent.createSendMessage(update);
-        sendMessage.setReplyMarkup(bottons.getMainButtons());
+        sendMessage.setReplyMarkup(bottons.getMainButtons(null));
         try {
             execute(sendMessage);
         } catch (Exception e) {
-            log.error("In first try 64 " + e.getMessage());
+            log.error("In first try " + e.getMessage());
         }
     }
 

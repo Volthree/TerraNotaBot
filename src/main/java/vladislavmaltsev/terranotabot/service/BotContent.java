@@ -73,13 +73,17 @@ public class BotContent {
     public SendMessage createSendMessage(Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId());
-        sendMessage.setText("This is map generation bot! " +
-                "Choose parameters " +
-                "'Map size' for picture size, " +
-                "'Scale' for pixel-style, " +
-                "'Height difference' and 'Islands modifier' " +
-                ", then GENERATE. " +
-                "You can 'Get last map' for changing water filling on last created map.");
+        sendMessage.setText("""
+                <strong>This is map generation bot!</strong>
+                
+                <em>Choose parameters: </em>
+                <i><b>Map size - </b> for picture size</i>
+                <i><b>Scale - </b> for pixel-style</i>
+                <i><b>Height difference - </b> for heights</i>
+                <i><b>Islands modifier - </b> for land area</i>
+                <i>and then <b>GENERATE</b> </i>
+                <i>You can <b>Get last map</b> for changing water filling on last created map.</i>""");
+        sendMessage.enableHtml(true);
         return sendMessage;
     }
 }
