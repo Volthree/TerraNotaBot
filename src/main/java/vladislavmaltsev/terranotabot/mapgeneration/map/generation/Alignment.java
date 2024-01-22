@@ -1,4 +1,4 @@
-package vladislavmaltsev.terranotabot.mapgeneration;
+package vladislavmaltsev.terranotabot.mapgeneration.map.generation;
 
 
 public class Alignment {

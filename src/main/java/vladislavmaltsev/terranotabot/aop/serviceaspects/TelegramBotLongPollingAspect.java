@@ -24,7 +24,6 @@ public class TelegramBotLongPollingAspect {
     public void logServiceBefore(JoinPoint joinPoint, Object object) {
 
         List<Update> updateList = (List<Update>) object;
-
         for (Update update : updateList) {
             if (update.hasMessage())
                 log.info("Update messages: {} in UpdateId {}", update.getMessage().getText(), update.getUpdateId());

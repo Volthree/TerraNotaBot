@@ -106,7 +106,7 @@ public class Bottons {
 
     public InlineKeyboardMarkup getLastMapButton(Optional<UserParameters> userParameters) {
         List<List<InlineKeyboardButton>> rowsButton = new ArrayList<>();
-        if (userParameters.isPresent()) {
+        if (userParameters.isPresent() && userParameters.get().getMapid() != null) {
             var row1Button = List.of(
                     createButtonFromString(
                             userParameters.get().getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)

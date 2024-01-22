@@ -1,4 +1,4 @@
-package vladislavmaltsev.terranotabot.mapgeneration;
+package vladislavmaltsev.terranotabot.mapgeneration.map.generation;
 
 public class Diamond {
     public void diamond(double step, double[][] heightMap, double xStartDia, double yStartDia,

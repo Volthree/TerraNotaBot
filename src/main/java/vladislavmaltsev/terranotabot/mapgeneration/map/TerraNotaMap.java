@@ -2,20 +2,20 @@ package vladislavmaltsev.terranotabot.mapgeneration.map;
 
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import vladislavmaltsev.terranotabot.enity.MapHeights;
-import vladislavmaltsev.terranotabot.mapgeneration.Alignment;
-import vladislavmaltsev.terranotabot.mapgeneration.HeightMap;
+import vladislavmaltsev.terranotabot.mapgeneration.map.generation.Alignment;
+import vladislavmaltsev.terranotabot.mapgeneration.map.generation.HeightMap;
 
 
 @Data
 @Builder
 public class TerraNotaMap {
-
-
+    @Id
+    private String id;
     private int width;
     private int height;
     private int mapScale;
-    private MapCell[][] mapCells;
     private MapHeights mapHeights;
     private int heightDifference;
     private int islandsModifier;
@@ -32,7 +32,6 @@ public class TerraNotaMap {
         mapHeights.setArrayHeights(new int[height][width]);
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                mapCells[x][y] = new MapCell((int) heightMap[x][y]);
                 mapHeights.getArrayHeights()[x][y] = (int)heightMap[x][y];
             }
         }

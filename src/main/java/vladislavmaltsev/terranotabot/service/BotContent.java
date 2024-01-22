@@ -5,7 +5,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import vladislavmaltsev.terranotabot.enity.MapHeights;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.imagegeneration.ImageGenerator;
 import vladislavmaltsev.terranotabot.mapgeneration.MapGenerator;
@@ -24,11 +23,11 @@ public class BotContent {
         this.imageGenerator = imageGenerator;
     }
 
-    public SendPhoto createSendPhoto(long chatId, int width, int height, int mapScale,
-                                     int heightDifference, int islandsModifier) {
+    public SendPhoto createSendPhotoTerraNotaMapImage(long chatId, UserParameters up) {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
-        terraNotaMap = mapGenerator.generateMap(width, height, mapScale, heightDifference, islandsModifier);
+        terraNotaMap = mapGenerator.generateMap(up.getMapSize(), up.getMapSize(),
+                up.getScale(), up.getHeightDifference(), up.getIslandsModifier());
         InputStream terraImageIS = imageGenerator.generateImage(terraNotaMap);
         sendPhoto.setPhoto(new InputFile(terraImageIS, "myName"));
         try {
@@ -38,25 +37,25 @@ public class BotContent {
         }
         return sendPhoto;
     }
-    public MapHeights changeMapHeights(MapHeights mapHeights, int value){
-        int[][] array = mapHeights.getArrayHeights();
+    public TerraNotaMap changeMapHeights(TerraNotaMap terraNotaMap, int value){
+        int[][] array = terraNotaMap.getMapHeights().getArrayHeights();
         for(int x = 0; x < array.length; x++){
             for (int y = 0; y < array[x].length; y++){
                 array[x][y] = array[x][y] + value;
             }
         }
-        mapHeights.setArrayHeights(array);
-        return mapHeights;
+        terraNotaMap.getMapHeights().setArrayHeights(array);
+        return terraNotaMap;
     }
-    public SendPhoto getExistedPhoto(long chatId, MapHeights mapHeights, UserParameters userParameters){
+    public SendPhoto getExistedPhoto(long chatId, TerraNotaMap terraNotaMap, UserParameters userParameters){
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(chatId);
-        TerraNotaMap terraNotaMap1 = TerraNotaMap.builder()
-                .width(userParameters.getMapSize())
-                .height(userParameters.getMapSize())
-                .mapHeights(mapHeights)
-                .build();
-        InputStream terraImageIS = imageGenerator.generateImage(terraNotaMap1);
+//        TerraNotaMap terraNotaMap1 = TerraNotaMap.builder()
+//                .width(userParameters.getMapSize())
+//                .height(userParameters.getMapSize())
+//                .mapHeights(mapHeights)
+//                .build();
+        InputStream terraImageIS = imageGenerator.generateImage(terraNotaMap);
         sendPhoto.setPhoto(new InputFile(terraImageIS, "myName"));
         try {
             terraImageIS.close();

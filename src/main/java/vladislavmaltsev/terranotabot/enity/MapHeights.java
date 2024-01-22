@@ -12,7 +12,6 @@ public class MapHeights {
 
     @Id
     private String id;
-
     private int[][] arrayHeights;
 
 }

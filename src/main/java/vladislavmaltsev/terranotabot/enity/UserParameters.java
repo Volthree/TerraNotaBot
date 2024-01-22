@@ -50,6 +50,8 @@ public class UserParameters {
                 .mapSize(513)
                 .scale(1)
                 .islandsModifier(10)
+                .localDateTime(LocalDateTime.now())
+                .username(update.getCallbackQuery().getFrom().getUserName())
                 .build();
     }
 

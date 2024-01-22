@@ -1,4 +1,7 @@
-package vladislavmaltsev.terranotabot.mapgeneration;
+package vladislavmaltsev.terranotabot.mapgeneration.map.generation;
+
+import vladislavmaltsev.terranotabot.mapgeneration.map.generation.Diamond;
+import vladislavmaltsev.terranotabot.mapgeneration.map.generation.Square;
 
 public class HeightMap {
     public void generateHeightMap(int width, double[][] heightMap,

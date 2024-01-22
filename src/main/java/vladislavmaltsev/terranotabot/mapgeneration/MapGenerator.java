@@ -1,7 +1,6 @@
 package vladislavmaltsev.terranotabot.mapgeneration;
 
 import org.springframework.stereotype.Component;
-import vladislavmaltsev.terranotabot.mapgeneration.map.MapCell;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 
 @Component
@@ -15,7 +14,6 @@ public class MapGenerator {
                 .mapScale(mapScale)
                 .heightDifference(heightDifference)
                 .islandsModifier(islandsModifier)
-                .mapCells(new MapCell[width][height])
                 .build();
         t.generate();
         return t;
