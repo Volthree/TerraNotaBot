@@ -29,7 +29,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final BotContent botContent;
     private final UserParametersRepository userParametersRepository;
     private final TerraNotaMapReporitory terraNotaMapReporitory;
-
     private final MapHeightsRepository mapHeightsRepository;
 
     @Autowired
