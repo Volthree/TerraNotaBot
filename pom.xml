@@ -8,7 +8,6 @@
         <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <packaging>war</packaging>
     <groupId>VladislavMaltsev</groupId>
     <artifactId>TerraNotaBot</artifactId>
     <version>1.0.0</version>
@@ -70,11 +69,6 @@
             <groupId>org.knowm.xchart</groupId>
             <artifactId>xchart</artifactId>
             <version>3.8.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.nekohtml</groupId>
-            <artifactId>nekohtml</artifactId>
-            <version>1.9.22</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
