@@ -111,7 +111,9 @@ public class Bottons {
                     createButtonFromString(
                             userParameters.get().getLocalDateTime().format(DateTimeFormatter.ISO_LOCAL_DATE)
                                     + " : edit or get existed map",
-                            userParameters.get().getMapid())
+//                            userParameters.get().getMapid()
+                            String.valueOf(userParameters.get().getMapHash())
+                            )
             );
             rowsButton.add(row1Button);
         }

@@ -1,7 +1,9 @@
 package vladislavmaltsev.terranotabot.mapgeneration.map;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import vladislavmaltsev.terranotabot.enity.MapHeights;
 import vladislavmaltsev.terranotabot.mapgeneration.map.generation.Alignment;
@@ -10,9 +12,11 @@ import vladislavmaltsev.terranotabot.mapgeneration.map.generation.HeightMap;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TerraNotaMap {
-    @Id
-    private String id;
+//    @Id
+//    private String id;
     private int width;
     private int height;
     private int mapScale;

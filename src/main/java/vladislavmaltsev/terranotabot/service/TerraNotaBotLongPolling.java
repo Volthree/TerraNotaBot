@@ -1,5 +1,7 @@
 package vladislavmaltsev.terranotabot.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,6 @@ import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.MapHeightsRepository;
-import vladislavmaltsev.terranotabot.repository.TerraNotaMapReporitory;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 
 import java.time.LocalDateTime;
@@ -28,21 +29,18 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final Bottons bottons;
     private final BotContent botContent;
     private final UserParametersRepository userParametersRepository;
-    private final TerraNotaMapReporitory terraNotaMapReporitory;
     private final MapHeightsRepository mapHeightsRepository;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
                                    Bottons bottons, BotContent botContent,
                                    UserParametersRepository userParametersRepository,
-                                   TerraNotaMapReporitory terraNotaMapReporitory,
                                    MapHeightsRepository mapHeightsRepository) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottons = bottons;
         this.botContent = botContent;
         this.userParametersRepository = userParametersRepository;
-        this.terraNotaMapReporitory = terraNotaMapReporitory;
         this.mapHeightsRepository = mapHeightsRepository;
     }
 
@@ -60,7 +58,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             int messageId = update.getCallbackQuery().getMessage().getMessageId();
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
-            userParameters = getUserParameters(chatId, update, messageId);
+            userParameters = getUserParametersDependsExisted(chatId, update, messageId);
             EditMessageReplyMarkup replyMarkup = getReplyMarkup(chatId, messageId);
 
             String callbackData = update.getCallbackQuery().getData();
@@ -78,8 +76,11 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 case "Generate" -> {
                     var up = userParametersRepository.findByChatId(chatId).orElse(null);
                     sendPhoto = botContent.createSendPhotoTerraNotaMapImage(chatId, up);
-                    TerraNotaMap t = terraNotaMapReporitory.save(botContent.getTerraNotaMap());
-                    setUsernameDateMapId(up, update, t);
+                    // OLD TerraNotaMap t = terraNotaMapReporitory.save(botContent.getTerraNotaMap());
+                    // new
+                    TerraNotaMap t = botContent.getTerraNotaMap();
+                    // end new
+                    setUsernameDateAndMapIdAndMapHash(up, update, t);
                     userParametersRepository.save(up);
                     replyMarkup.setReplyMarkup(bottons.getLastMapButton(Optional.of(up)));
                 }
@@ -136,39 +137,34 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 default -> {
                     if (callbackData.contains("get map ")) {
                         callbackData = callbackData.substring("get map ".length()).trim();
-                        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+                        var usersParamByMapHash = userParametersRepository.findByMapHash(Integer.valueOf(callbackData));
                         Optional<TerraNotaMap> terraNotaMap = Optional.empty();
-                        if (usersParamByMapId.isPresent())
-                            terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
-                        sendPhoto = botContent.getExistedPhoto(chatId, terraNotaMap.orElse(null), usersParamByMapId.orElse(null));
-                        Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
+                        if (usersParamByMapHash.isPresent())
+                            //OLD terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
+                            //new
+                            terraNotaMap = Optional.of(fromJson(usersParamByMapHash.get().getMapid()));
+                        //end new
+                        sendPhoto = botContent.getExistedPhoto(chatId, terraNotaMap.orElse(null), usersParamByMapHash.orElse(null));
+                        Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
                         replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
-                    }
-
-                    else if(callbackData.contains("Water level +1 ")){
+                    } else if (callbackData.contains("Water level +1 ")) {
                         callbackData = callbackData.substring("Water level +1 ".length()).trim();
                         setReplyMarkupUpdateData(callbackData, replyMarkup, -1, "Water level +1 ", sendPhoto, chatId);
-                    }
-                    else if(callbackData.contains("Water level -1 ")){
+                    } else if (callbackData.contains("Water level -1 ")) {
                         callbackData = callbackData.substring("Water level -1 ".length()).trim();
                         setReplyMarkupUpdateData(callbackData, replyMarkup, 1, "Water level -1 ", sendPhoto, chatId);
-                    }
-                    else if(callbackData.contains("Water level +5 ")){
+                    } else if (callbackData.contains("Water level +5 ")) {
                         callbackData = callbackData.substring("Water level +5 ".length()).trim();
                         setReplyMarkupUpdateData(callbackData, replyMarkup, -5, "Water level +5 ", sendPhoto, chatId);
-                    }
-                    else if(callbackData.contains("Water level -5 ")){
+                    } else if (callbackData.contains("Water level -5 ")) {
                         callbackData = callbackData.substring("Water level -5 ".length()).trim();
                         setReplyMarkupUpdateData(callbackData, replyMarkup, +5, "Water level -5 ", sendPhoto, chatId);
-                    }
-                    else if (callbackData.contains("back to map ")) {
+                    } else if (callbackData.contains("back to map ")) {
                         replyMarkup.setReplyMarkup(bottons.getMainButtons(userParameters));
-                    }
-                    else if(callbackData.contains("control water level ")){
+                    } else if (callbackData.contains("control water level ")) {
                         callbackData = callbackData.substring("control water level ".length()).trim();
                         replyMarkup.setReplyMarkup(bottons.getControlWaterLevelBottons(callbackData));
-                    }
-                    else {
+                    } else {
                         replyMarkup.setReplyMarkup(bottons.getMapManipulationButtons(callbackData));
                     }
                 }
@@ -188,17 +184,23 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
 
     private void setReplyMarkupUpdateData(String callbackData, EditMessageReplyMarkup replyMarkup,
                                           int value, String type, SendPhoto sendPhoto, long chatId) {
-        var usersParamByMapId = userParametersRepository.findByMapid(callbackData);
+        var usersParamByMapId = userParametersRepository.findByMapHash(Integer.valueOf(callbackData));
         Optional<TerraNotaMap> terraNotaMap = Optional.empty();
         if (usersParamByMapId.isPresent())
-            terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
-        if(!Objects.equals(type, "get map ")) {
+            //OLD terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
+            //new
+            terraNotaMap = Optional.of(fromJson(usersParamByMapId.get().getMapid()));
+        //end new
+        if (!Objects.equals(type, "get map ")) {
             TerraNotaMap changedMapHeights = botContent.changeMapHeights(terraNotaMap.orElse(null), value);
-            terraNotaMapReporitory.save(changedMapHeights);
+            usersParamByMapId.get().setMapid(toJson(terraNotaMap.get()));
+            usersParamByMapId = Optional.of(userParametersRepository.save(usersParamByMapId.get()));
+//            terraNotaMapReporitory.save(changedMapHeights);
+
             replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
         } else {
             sendPhoto = botContent.getExistedPhoto(chatId, terraNotaMap.orElse(null), usersParamByMapId.orElse(null));
-            Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatIdAndMaxDate(chatId);
+            Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
             replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
         }
     }
@@ -210,10 +212,11 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         replyMarkup.setReplyMarkup(bottons.getMainButtons(userParameters));
     }
 
-    private void setUsernameDateMapId(UserParameters up, Update update, TerraNotaMap t) {
+    private void setUsernameDateAndMapIdAndMapHash(UserParameters up, Update update, TerraNotaMap t) {
         up.setUsername(update.getCallbackQuery().getFrom().getUserName());
         up.setLocalDateTime(LocalDateTime.now());
-        up.setMapid(t.getId());
+        up.setMapHash(t.hashCode());
+        up.setMapid(toJson(t));
     }
 
     private EditMessageReplyMarkup getReplyMarkup(long chatId, int messageId) {
@@ -223,7 +226,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         return replyMarkup;
     }
 
-    private UserParameters getUserParameters(long chatId, Update update, int messageId) {
+    private UserParameters getUserParametersDependsExisted(long chatId, Update update, int messageId) {
         var i = userParametersRepository.findByChatId(chatId);
         if (i.isPresent()) {
             log.info("Getting existed UserParameters");
@@ -236,13 +239,31 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         }
     }
 
-    private void createSendMessage(Update update){
+    private void createSendMessage(Update update) {
         SendMessage sendMessage = botContent.createSendMessage(update);
         sendMessage.setReplyMarkup(bottons.getMainButtons(null));
         try {
             execute(sendMessage);
         } catch (Exception e) {
             log.error("In first try " + e.getMessage());
+        }
+    }
+
+    public static String toJson(TerraNotaMap terraNotaMap) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(terraNotaMap);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static TerraNotaMap fromJson(String json) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.readValue(json, TerraNotaMap.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

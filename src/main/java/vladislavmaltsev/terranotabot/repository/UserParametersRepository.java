@@ -18,7 +18,7 @@ public interface UserParametersRepository extends JpaRepository<UserParameters, 
     Optional<UserParameters> findByChatIdAndMaxDate(@Param("chat") long chatId);
 
     Optional<UserParameters> findByMapid(String mapId);
-
+    Optional<UserParameters> findByMapHash(int mapId);
     Optional<UserParameters> findByChatId(long chatId);
 
 }

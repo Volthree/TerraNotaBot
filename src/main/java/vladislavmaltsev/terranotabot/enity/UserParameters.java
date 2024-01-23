@@ -40,7 +40,8 @@ public class UserParameters {
     private LocalDateTime localDateTime;
     @Column(name = "mapid")
     private String mapid;
-
+    @Column(name = "maphash")
+    private int mapHash;
     public static UserParameters getDefaultWithUpdate(Update update, int messageId, long chatId){
         return UserParameters.builder()
                 .updateId(update.getUpdateId())

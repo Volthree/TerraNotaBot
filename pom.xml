@@ -8,9 +8,10 @@
         <version>3.2.1</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+    <packaging>war</packaging>
     <groupId>VladislavMaltsev</groupId>
     <artifactId>TerraNotaBot</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>TerraNotaBot</name>
     <description>TerraNotaBot</description>
     <properties>
