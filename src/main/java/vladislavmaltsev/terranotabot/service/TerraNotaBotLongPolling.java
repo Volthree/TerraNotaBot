@@ -15,7 +15,6 @@ import vladislavmaltsev.terranotabot.annotations.LogAnn;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
-import vladislavmaltsev.terranotabot.repository.MapHeightsRepository;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 
 import java.time.LocalDateTime;
@@ -29,19 +28,16 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final Bottons bottons;
     private final BotContent botContent;
     private final UserParametersRepository userParametersRepository;
-    private final MapHeightsRepository mapHeightsRepository;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
                                    Bottons bottons, BotContent botContent,
-                                   UserParametersRepository userParametersRepository,
-                                   MapHeightsRepository mapHeightsRepository) {
+                                   UserParametersRepository userParametersRepository) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottons = bottons;
         this.botContent = botContent;
         this.userParametersRepository = userParametersRepository;
-        this.mapHeightsRepository = mapHeightsRepository;
     }
 
     @Override
