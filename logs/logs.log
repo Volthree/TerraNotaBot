@@ -1,7 +1,0 @@
-15:26:18.865 [main] INFO  vladislavmaltsev.terranotabot.TerraNotaBotApplication - Starting TerraNotaBotApplication using Java 17.0.2 with PID 6212 (E:\All Java\TerraNotaBot\target\classes started by Vladiys Velikolepniy in E:\All Java\TerraNotaBot)
-15:26:18.879 [main] DEBUG vladislavmaltsev.terranotabot.TerraNotaBotApplication - Running with Spring Boot v3.2.1, Spring v6.1.2
-15:26:18.883 [main] INFO  vladislavmaltsev.terranotabot.TerraNotaBotApplication - No active profile set, falling back to 1 default profile: "default"
-15:26:36.768 [main] DEBUG vladislavmaltsev.terranotabot.config.TelegramBotInit - Before register bot with DefaultBotSession.class
-15:26:37.184 [main] DEBUG vladislavmaltsev.terranotabot.config.TelegramBotInit - After register bot with DefaultBotSession.class
-15:26:37.186 [main] INFO  vladislavmaltsev.terranotabot.TerraNotaBotApplication - Started TerraNotaBotApplication in 18.959 seconds (process running for 21.234)
-15:26:59.606 [TerraNotaBot Telegram Executor] INFO  vladislavmaltsev.terranotabot.aop.serviceaspects.TelegramBotLongPollingAspect - Update messages: /start in UpdateId 161189254
