@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class Bottons {
+public class BottonsService {
 
 
     public InlineKeyboardButton createButton(String setText, String buttonName) {

@@ -15,15 +15,15 @@ import java.io.InputStream;
 
 @Service
 @Getter
-public class BotContent {
+public class BotContentService {
     private final MapGenerator mapGenerator;
     private final ImageGenerator imageGenerator;
     private final PhotoService photoService;
     private TerraNotaMap terraNotaMap;
 
-    public BotContent(MapGenerator mapGenerator,
-                      ImageGenerator imageGenerator,
-                      PhotoService photoService) {
+    public BotContentService(MapGenerator mapGenerator,
+                             ImageGenerator imageGenerator,
+                             PhotoService photoService) {
         this.mapGenerator = mapGenerator;
         this.imageGenerator = imageGenerator;
         this.photoService = photoService;
