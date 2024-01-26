@@ -31,12 +31,12 @@ public class ReplyMarkupService {
         this.bottonsService = bottonsService;
         this.botContentService = botContentService;
     }
-    public void setReplyMarkup(long chatId, int messageId) {
+    public void setReplyMarkupId(long chatId, int messageId) {
         replyMarkup = new EditMessageReplyMarkup();
         replyMarkup.setChatId(chatId);
         replyMarkup.setMessageId(messageId);
     }
-    public void setReplyMarkup(InlineKeyboardMarkup inlineKeyboardMarkup) {
+    public void setReplyMarkupKeyboard(InlineKeyboardMarkup inlineKeyboardMarkup) {
         replyMarkup.setReplyMarkup(inlineKeyboardMarkup);
     }
 

@@ -11,9 +11,16 @@ import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 public class UserParametersService {
 
     private final UserParametersRepository userParametersRepository;
+    private final ReplyMarkupService replyMarkupService;
+    private final BottonsService bottonsService;
 
-    public UserParametersService(UserParametersRepository userParametersRepository) {
+
+    public UserParametersService(UserParametersRepository userParametersRepository,
+                                 ReplyMarkupService replyMarkupService,
+                                 BottonsService bottonsService) {
         this.userParametersRepository = userParametersRepository;
+        this.replyMarkupService = replyMarkupService;
+        this.bottonsService = bottonsService;
     }
 
     public UserParameters getUserParametersDependsExisted(long chatId, Update update, int messageId) {
@@ -27,5 +34,25 @@ public class UserParametersService {
             userParametersRepository.save(userParameters);
             return userParameters;
         }
+    }
+    public void mapSizeParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+        userParameters.setMapSize(value);
+        userParametersRepository.save(userParameters);
+        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+    }
+    public void mapScaleParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+        userParameters.setScale(value);
+        userParametersRepository.save(userParameters);
+        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+    }
+    public void mapHeightParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+        userParameters.setHeightDifference(value);
+        userParametersRepository.save(userParameters);
+        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+    }
+    public void mapIslandParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+        userParameters.setIslandsModifier(value);
+        userParametersRepository.save(userParameters);
+        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
     }
 }

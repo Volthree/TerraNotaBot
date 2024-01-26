@@ -40,7 +40,7 @@ public class BotContentService {
         photoService.closeImageStream(terraImageIS);
         return sendPhoto;
     }
-    public SendMessage createSendMessage(Update update) {
+    public SendMessage getSendMessage(Update update) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId());
         sendMessage.setText("""
