@@ -28,16 +28,18 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final Bottons bottons;
     private final BotContent botContent;
     private final UserParametersRepository userParametersRepository;
+    private final MapService mapService;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
                                    Bottons bottons, BotContent botContent,
-                                   UserParametersRepository userParametersRepository) {
+                                   UserParametersRepository userParametersRepository, MapService mapService) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottons = bottons;
         this.botContent = botContent;
         this.userParametersRepository = userParametersRepository;
+        this.mapService = mapService;
     }
 
     @Override
@@ -71,11 +73,8 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 }
                 case "Generate" -> {
                     var up = userParametersRepository.findByChatId(chatId).orElse(null);
-                    sendPhoto = botContent.createSendPhotoTerraNotaMapImage(chatId, up);
-                    // OLD TerraNotaMap t = terraNotaMapReporitory.save(botContent.getTerraNotaMap());
-                    // new
+                    sendPhoto = botContent.getSendPhoto(chatId, null, up);
                     TerraNotaMap t = botContent.getTerraNotaMap();
-                    // end new
                     setUsernameDateAndMapIdAndMapHash(up, update, t);
                     userParametersRepository.save(up);
                     replyMarkup.setReplyMarkup(bottons.getLastMapButton(Optional.of(up)));
@@ -136,11 +135,8 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                         var usersParamByMapHash = userParametersRepository.findByMapHash(Integer.valueOf(callbackData));
                         Optional<TerraNotaMap> terraNotaMap = Optional.empty();
                         if (usersParamByMapHash.isPresent())
-                            //OLD terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
-                            //new
                             terraNotaMap = Optional.of(fromJson(usersParamByMapHash.get().getMapid()));
-                        //end new
-                        sendPhoto = botContent.getExistedPhoto(chatId, terraNotaMap.orElse(null), usersParamByMapHash.orElse(null));
+                        sendPhoto = botContent.getSendPhoto(chatId, terraNotaMap.orElse(null), null);
                         Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
                         replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
                     } else if (callbackData.contains("Water level +1 ")) {
@@ -183,19 +179,15 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         var usersParamByMapId = userParametersRepository.findByMapHash(Integer.valueOf(callbackData));
         Optional<TerraNotaMap> terraNotaMap = Optional.empty();
         if (usersParamByMapId.isPresent())
-            //OLD terraNotaMap = terraNotaMapReporitory.findById(usersParamByMapId.get().getMapid());
-            //new
             terraNotaMap = Optional.of(fromJson(usersParamByMapId.get().getMapid()));
-        //end new
+
         if (!Objects.equals(type, "get map ")) {
-            TerraNotaMap changedMapHeights = botContent.changeMapHeights(terraNotaMap.orElse(null), value);
+            TerraNotaMap changedMapHeights = mapService.changeMapHeights(terraNotaMap.orElse(null), value);
             usersParamByMapId.get().setMapid(toJson(terraNotaMap.get()));
             usersParamByMapId = Optional.of(userParametersRepository.save(usersParamByMapId.get()));
-//            terraNotaMapReporitory.save(changedMapHeights);
-
             replyMarkup.setReplyMarkup(bottons.getLastMapButton(usersParamByMapId));
         } else {
-            sendPhoto = botContent.getExistedPhoto(chatId, terraNotaMap.orElse(null), usersParamByMapId.orElse(null));
+            sendPhoto = botContent.getSendPhoto(chatId, terraNotaMap.orElse(null), null);
             Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
             replyMarkup.setReplyMarkup(bottons.getLastMapButton(userPatamLastMapOptional));
         }
