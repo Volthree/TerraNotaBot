@@ -22,8 +22,12 @@ public class TelegramBotLongPollingAspect {
     @Before("isOnUpdateReceivedList() " +
             "&& args(object)")
     public void logServiceBefore(JoinPoint joinPoint, Object object) {
-
-        List<Update> updateList = (List<Update>) object;
+        List<Update> updateList = null;
+        try {
+            updateList = (List<Update>) object;
+        } catch (ClassCastException e) {
+            log.error(e.getMessage());
+        }
         for (Update update : updateList) {
             if (update.hasMessage())
                 log.info("Update messages: {} in UpdateId {}", update.getMessage().getText(), update.getUpdateId());
