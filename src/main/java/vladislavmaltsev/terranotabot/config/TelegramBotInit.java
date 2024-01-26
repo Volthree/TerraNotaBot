@@ -21,7 +21,6 @@ public class TelegramBotInit {
     public TelegramBotInit(TerraNotaBotLongPolling terraNotaBotLongPolling) {
         this.terraNotaBotLongPolling = terraNotaBotLongPolling;
     }
-
     @EventListener({ContextRefreshedEvent.class})
     public void init() {
         log.debug("Before register bot with DefaultBotSession.class");
