@@ -11,15 +11,12 @@ import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 public class UserParametersService {
 
     private final UserParametersRepository userParametersRepository;
-    private final ReplyMarkupService replyMarkupService;
     private final BottonsService bottonsService;
 
 
     public UserParametersService(UserParametersRepository userParametersRepository,
-                                 ReplyMarkupService replyMarkupService,
                                  BottonsService bottonsService) {
         this.userParametersRepository = userParametersRepository;
-        this.replyMarkupService = replyMarkupService;
         this.bottonsService = bottonsService;
     }
 

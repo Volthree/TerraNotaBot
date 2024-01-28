@@ -14,13 +14,6 @@ import static vladislavmaltsev.terranotabot.util.JsonData.JsonParser.toJson;
 public class UpdateService {
 
     private Update update;
-    private final BotContentService botContentService;
-    private final BottonsService bottonsService;
-
-    public UpdateService(BotContentService botContentService, BottonsService bottonsService) {
-        this.botContentService = botContentService;
-        this.bottonsService = bottonsService;
-    }
 
     public void setUpdate(Update update){
         this.update = update;

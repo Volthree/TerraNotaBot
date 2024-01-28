@@ -26,7 +26,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final BottonsService bottonsService;
     private final BotContentService botContentService;
     private final UserParametersRepository userParametersRepository;
-    private final MapService mapService;
     private final UserParametersService userParametersService;
     private final UpdateService updateService;
     private final ReplyMarkupService replyMarkupService;
@@ -37,7 +36,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
                                    BottonsService bottonsService, BotContentService botContentService,
                                    UserParametersRepository userParametersRepository,
-                                   MapService mapService,
                                    UserParametersService userParametersService,
                                    UpdateService updateService,
                                    ReplyMarkupService replyMarkupService,
@@ -47,7 +45,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         this.bottonsService = bottonsService;
         this.botContentService = botContentService;
         this.userParametersRepository = userParametersRepository;
-        this.mapService = mapService;
         this.userParametersService = userParametersService;
         this.updateService = updateService;
         this.replyMarkupService = replyMarkupService;
