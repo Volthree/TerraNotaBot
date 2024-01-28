@@ -55,36 +55,5 @@ public class UserParameters {
                 .username(update.getCallbackQuery().getFrom().getUserName())
                 .build();
     }
-    public String getMapSizeInString(){
-       return switch (mapSize){
-            case 129 -> "(Small)";
-            case 513 -> "(Medium)";
-            case 713 -> "(Large)";
-           default -> "";
-        };
-    }
-    public String getScaleInString(){
-        return switch (scale){
-            case 1 -> "(x1)";
-            case 2 -> "(x2)";
-            case 4 -> "(x4)";
-            default -> "";
-        };
-    }
-    public String getHeightDifferenceInString(){
-        return switch (heightDifference){
-            case 2 -> "(Smooth)";
-            case 4 -> "(Hill)";
-            case 9 -> "(Mountain)";
-            default -> "";
-        };
-    }
-    public String getIslandModifierInString(){
-        return switch (islandsModifier){
-            case 1 -> "(Islands)";
-            case 10 -> "(Backwater)";
-            case 40 -> "(Continent)";
-            default -> "";
-        };
-    }
+
 }

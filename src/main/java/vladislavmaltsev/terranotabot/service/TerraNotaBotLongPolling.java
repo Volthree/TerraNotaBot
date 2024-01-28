@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import vladislavmaltsev.terranotabot.annotations.LogAnn;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
+import vladislavmaltsev.terranotabot.dto.UserParametersDTO;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
@@ -59,24 +60,31 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         SendPhoto sendPhoto = null;
         SendMessage sendMessage = null;
-        UserParameters userParameters;
+        UserParametersDTO userParameters = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
             switch (update.getMessage().getText()) {
-                case "/start", "/menu" -> sendMessage = sendMessageService.getDefaultMessage(update);
+                case "/start", "/menu" -> {
+                    sendMessage = sendMessageService.getDefaultMessage(update, userParameters);
+                    execute(sendMessage);
+                }
             }
         } else if (update.hasCallbackQuery()) {
             updateService.setUpdate(update);
             int messageId = updateService.getMessageId();
             long chatId = updateService.getChatId();
             String callbackData = updateService.getCallbackQuery();
-            userParameters = userParametersService.getUserParametersDependsExisted(chatId, update, messageId);
+            userParameters = userParametersService
+                    .getUserParametersDependsExisted(chatId, update, messageId);
             replyMarkupService.setReplyMarkupId(chatId, messageId);
             switch (callbackData) {
                 case "Map size" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getSizeButtons());
                 case "Scale" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getScaleButtons());
-                case "Height difference" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getHeightDifferenceButtons());
-                case "Islands modifier" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getIslandsModifierButtons());
-                case "Get last map" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userParametersRepository.findByChatId(chatId)));
+                case "Height difference" ->
+                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getHeightDifferenceButtons());
+                case "Islands modifier" ->
+                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getIslandsModifierButtons());
+                case "Get last map" ->
+                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userParametersRepository.findByChatId(chatId)));
                 case "Small" -> userParametersService.mapSizeParameter(userParameters, 129, replyMarkupService);
                 case "Medium" -> userParametersService.mapSizeParameter(userParameters, 513, replyMarkupService);
                 case "Large" -> userParametersService.mapSizeParameter(userParameters, 713, replyMarkupService);
@@ -136,12 +144,13 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 execute(photoService.getSendPhoto());
             if (replyMarkupService.getReplyMarkup() != null)
                 execute(replyMarkupService.getReplyMarkup());
-            if (sendMessage != null)
-                execute(sendMessage);
+//            if (sendMessage != null)
+//                execute(sendMessage);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
     }
+
     @Override
     public String getBotUsername() {
         return telegramBotConfig.getBotName();

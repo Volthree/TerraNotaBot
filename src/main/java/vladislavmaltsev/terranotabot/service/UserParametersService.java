@@ -2,9 +2,16 @@ package vladislavmaltsev.terranotabot.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import vladislavmaltsev.terranotabot.dto.UserParametersDTO;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
+import vladislavmaltsev.terranotabot.util.MappingDTOAndClass;
+
+import java.util.Optional;
+
+import static vladislavmaltsev.terranotabot.util.MappingDTOAndClass.mapDTOAndClass;
 
 @Service
 @Slf4j
@@ -20,36 +27,48 @@ public class UserParametersService {
         this.bottonsService = bottonsService;
     }
 
-    public UserParameters getUserParametersDependsExisted(long chatId, Update update, int messageId) {
-        var i = userParametersRepository.findByChatId(chatId);
+    @Transactional
+    public UserParametersDTO getUserParametersDependsExisted(long chatId, Update update, int messageId) {
+        var i = findByChatId(chatId);
         if (i.isPresent()) {
             log.info("Getting existed UserParameters");
-            return i.get();
+            return i.orElseThrow();
         } else {
             log.info("New UserParameters created");
-            UserParameters userParameters = UserParameters.getDefaultWithUpdate(update, messageId, chatId);
-            userParametersRepository.save(userParameters);
-            return userParameters;
+            var userParameters = MappingDTOAndClass.mapDTOAndClass(UserParameters.getDefaultWithUpdate(update, messageId, chatId),
+                    UserParametersDTO.class);
+            return save(userParameters).orElseThrow();
         }
     }
-    public void mapSizeParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+    public void mapSizeParameter(UserParametersDTO userParameters, int value, ReplyMarkupService replyMarkupService){
         userParameters.setMapSize(value);
-        userParametersRepository.save(userParameters);
+        save(userParameters);
         replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
     }
-    public void mapScaleParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+    public void mapScaleParameter(UserParametersDTO userParameters, int value, ReplyMarkupService replyMarkupService){
         userParameters.setScale(value);
-        userParametersRepository.save(userParameters);
+        save(userParameters);
         replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
     }
-    public void mapHeightParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+    public void mapHeightParameter(UserParametersDTO userParameters, int value, ReplyMarkupService replyMarkupService){
         userParameters.setHeightDifference(value);
-        userParametersRepository.save(userParameters);
+        save(userParameters);
         replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
     }
-    public void mapIslandParameter(UserParameters userParameters, int value, ReplyMarkupService replyMarkupService){
+    public void mapIslandParameter(UserParametersDTO userParameters, int value, ReplyMarkupService replyMarkupService){
         userParameters.setIslandsModifier(value);
-        userParametersRepository.save(userParameters);
+        save(userParameters);
         replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+    }
+    @Transactional(readOnly = true)
+    public Optional<UserParametersDTO> findByChatId(long chatId){
+        return Optional.ofNullable(
+                mapDTOAndClass(userParametersRepository.findByChatId(chatId).orElse(null)
+                        , UserParametersDTO.class));
+    }
+    public Optional<UserParametersDTO> save(UserParametersDTO userParametersDTO){
+        return Optional.ofNullable(MappingDTOAndClass.mapDTOAndClass(userParametersRepository.save(
+                MappingDTOAndClass.mapDTOAndClass(userParametersDTO, UserParameters.class)
+        ), UserParametersDTO.class));
     }
 }

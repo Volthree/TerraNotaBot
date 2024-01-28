@@ -3,6 +3,7 @@ package vladislavmaltsev.terranotabot.service;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import vladislavmaltsev.terranotabot.dto.UserParametersDTO;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 
 import java.time.format.DateTimeFormatter;
@@ -198,7 +199,7 @@ public class BottonsService {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getMainButtons(UserParameters userParameters) {
+    public InlineKeyboardMarkup getMainButtons(UserParametersDTO userParameters) {
 
         var row1Button = List.of(
                 createButton("Map size "+ (userParameters !=null ? userParameters.getMapSizeInString() : ""), "Map size"),
