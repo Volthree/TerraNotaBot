@@ -15,11 +15,9 @@ import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static vladislavmaltsev.terranotabot.util.JsonData.JsonParser.fromJson;
-import static vladislavmaltsev.terranotabot.util.JsonData.JsonParser.toJson;
 
 @Service
 @Slf4j
@@ -33,6 +31,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final UpdateService updateService;
     private final ReplyMarkupService replyMarkupService;
     private final PhotoService photoService;
+    private final SendMessageService sendMessageService;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
@@ -42,7 +41,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                                    UserParametersService userParametersService,
                                    UpdateService updateService,
                                    ReplyMarkupService replyMarkupService,
-                                   PhotoService photoService) {
+                                   PhotoService photoService, SendMessageService sendMessageService) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottonsService = bottonsService;
@@ -53,6 +52,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         this.updateService = updateService;
         this.replyMarkupService = replyMarkupService;
         this.photoService = photoService;
+        this.sendMessageService = sendMessageService;
     }
 
     @SneakyThrows
@@ -61,10 +61,11 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     @Transactional
     public void onUpdateReceived(Update update) {
         SendPhoto sendPhoto = null;
+        SendMessage sendMessage = null;
         UserParameters userParameters;
         if (update.hasMessage() && update.getMessage().hasText()) {
             switch (update.getMessage().getText()) {
-                case "/start", "/menu" -> createSendMessage(update);
+                case "/start", "/menu" -> sendMessage = sendMessageService.getDefaultMessage(update);
             }
         } else if (update.hasCallbackQuery()) {
             updateService.setUpdate(update);
@@ -79,14 +80,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 case "Height difference" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getHeightDifferenceButtons());
                 case "Islands modifier" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getIslandsModifierButtons());
                 case "Get last map" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userParametersRepository.findByChatId(chatId)));
-                case "Generate" -> {
-                    var up = userParametersRepository.findByChatId(chatId).orElseThrow();
-                    sendPhoto = botContentService.getSendPhoto(chatId, null, up);
-                    TerraNotaMap t = botContentService.getTerraNotaMap();
-                    setUsernameDateAndMapIdAndMapHash(up, update, t);
-                    userParametersRepository.save(up);
-                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(Optional.of(up)));
-                }
                 case "Small" -> userParametersService.mapSizeParameter(userParameters, 129, replyMarkupService);
                 case "Medium" -> userParametersService.mapSizeParameter(userParameters, 513, replyMarkupService);
                 case "Large" -> userParametersService.mapSizeParameter(userParameters, 713, replyMarkupService);
@@ -100,6 +93,14 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                 case "Backwater" -> userParametersService.mapIslandParameter(userParameters, 10, replyMarkupService);
                 case "Continent" -> userParametersService.mapIslandParameter(userParameters, 40, replyMarkupService);
                 case "back" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+                case "Generate" -> {
+                    var up = userParametersRepository.findByChatId(chatId).orElseThrow();
+                    sendPhoto = botContentService.getSendPhoto(chatId, null, up);
+                    TerraNotaMap t = botContentService.getTerraNotaMap();
+                    updateService.setUsernameDateMapIdMapHash(up, update, t);
+                    userParametersRepository.save(up);
+                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(Optional.of(up)));
+                }
                 default -> {
                     if (callbackData.contains("get map ")) {
                         callbackData = callbackData.substring("get map ".length()).trim();
@@ -132,32 +133,16 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                     }
                 }
             }
-            try {
-                if (sendPhoto != null)
-                    execute(photoService.getSendPhoto());
-                execute(replyMarkupService.getReplyMarkup());
-            } catch (Exception e) {
-                log.error(e.getMessage());
-            }
         }
-    }
-    private void updateProcess(UserParameters userParameters) {
-        userParametersRepository.save(userParameters);
-        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
-    }
-    private void setUsernameDateAndMapIdAndMapHash(UserParameters up, Update update, TerraNotaMap t) {
-        up.setUsername(update.getCallbackQuery().getFrom().getUserName());
-        up.setLocalDateTime(LocalDateTime.now());
-        up.setMapHash(t.hashCode());
-        up.setMapid(toJson(t));
-    }
-    private void createSendMessage(Update update) {
-        SendMessage sendMessage = botContentService.getSendMessage(update);
-        sendMessage.setReplyMarkup(bottonsService.getMainButtons(null));
         try {
-            execute(sendMessage);
+            if (sendPhoto != null)
+                execute(photoService.getSendPhoto());
+            if (replyMarkupService.getReplyMarkup() != null)
+                execute(replyMarkupService.getReplyMarkup());
+            if (sendMessage != null)
+                execute(sendMessage);
         } catch (Exception e) {
-            log.error("In first try " + e.getMessage());
+            log.error(e.getMessage());
         }
     }
     @Override

@@ -20,6 +20,7 @@ public class BotContentService {
     private final ImageGenerator imageGenerator;
     private final PhotoService photoService;
     private TerraNotaMap terraNotaMap;
+    private SendPhoto sendPhoto;
 
     public BotContentService(MapGenerator mapGenerator,
                              ImageGenerator imageGenerator,
@@ -29,7 +30,7 @@ public class BotContentService {
         this.photoService = photoService;
     }
     public SendPhoto getSendPhoto(long chatId, TerraNotaMap terraNotaMap, UserParameters up) {
-        SendPhoto sendPhoto = photoService.createSendPhoto(chatId);
+        sendPhoto = photoService.createSendPhoto(chatId);
         if (terraNotaMap == null) {
             terraNotaMap = mapGenerator.generateMap(up.getMapSize(), up.getMapSize(),
                     up.getScale(), up.getHeightDifference(), up.getIslandsModifier());
