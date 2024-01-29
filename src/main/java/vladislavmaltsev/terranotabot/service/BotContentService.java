@@ -53,7 +53,8 @@ public class BotContentService {
                 <i><b>Height difference - </b> for heights</i>
                 <i><b>Islands modifier - </b> for land area</i>
                 <i>and then <b>GENERATE</b> </i>
-                <i>You can <b>Get last map</b> for changing water filling on last created map.</i>""");
+                <i>You can <b>Get last map</b> for changing water filling on last created map.</i>
+                <i>by https://t.me/vladiysvelikolepniy</i>""");
         sendMessage.enableHtml(true);
         return sendMessage;
     }
