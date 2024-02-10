@@ -33,4 +33,8 @@ public class UpdateService {
         up.setMapHash(t.hashCode());
         up.setMapid(toJson(t));
     }
+
+    public Update getUpdate() {
+        return update;
+    }
 }

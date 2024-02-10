@@ -10,13 +10,18 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import vladislavmaltsev.terranotabot.annotations.LogAnn;
+import vladislavmaltsev.terranotabot.components.SendPhotoComponent;
+import vladislavmaltsev.terranotabot.components.interfaces.ReplyMarcupInt;
 import vladislavmaltsev.terranotabot.config.TelegramBotConfig;
 import vladislavmaltsev.terranotabot.dto.UserParametersDTO;
 import vladislavmaltsev.terranotabot.enity.UserParameters;
 import vladislavmaltsev.terranotabot.mapgeneration.map.TerraNotaMap;
 import vladislavmaltsev.terranotabot.repository.UserParametersRepository;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static vladislavmaltsev.terranotabot.util.JsonData.JsonParser.fromJson;
 
@@ -32,6 +37,8 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final ReplyMarkupService replyMarkupService;
     private final PhotoService photoService;
     private final SendMessageService sendMessageService;
+    private Map<String, ReplyMarcupInt> replyMarcupInterfaceMap;
+    private final SendPhotoComponent sendPhotoComponent;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
@@ -40,7 +47,10 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                                    UserParametersService userParametersService,
                                    UpdateService updateService,
                                    ReplyMarkupService replyMarkupService,
-                                   PhotoService photoService, SendMessageService sendMessageService) {
+                                   PhotoService photoService,
+                                   SendMessageService sendMessageService,
+                                   List<ReplyMarcupInt> replyMarcupIntList,
+                                   SendPhotoComponent sendPhotoComponent) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottonsService = bottonsService;
@@ -51,6 +61,10 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         this.replyMarkupService = replyMarkupService;
         this.photoService = photoService;
         this.sendMessageService = sendMessageService;
+        this.replyMarcupInterfaceMap = replyMarcupIntList.stream().collect(Collectors.toMap(
+                ReplyMarcupInt::getId, x -> x
+        ));
+        this.sendPhotoComponent = sendPhotoComponent;
     }
 
     @SneakyThrows
@@ -58,7 +72,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     @LogAnn
     @Transactional
     public void onUpdateReceived(Update update) {
-        SendPhoto sendPhoto = null;
+//        SendPhoto sendPhoto = null;
         SendMessage sendMessage = null;
         UserParametersDTO userParameters = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -76,76 +90,127 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
             userParameters = userParametersService
                     .getUserParametersDependsExisted(chatId, update, messageId);
             replyMarkupService.setReplyMarkupId(chatId, messageId);
-            switch (callbackData) {
-                case "Map size" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getSizeButtons());
-                case "Scale" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getScaleButtons());
-                case "Height difference" ->
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getHeightDifferenceButtons());
-                case "Islands modifier" ->
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getIslandsModifierButtons());
-                case "Get last map" ->
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userParametersRepository.findByChatId(chatId)));
-                case "Small" -> userParametersService.mapSizeParameter(userParameters, 129, replyMarkupService);
-                case "Medium" -> userParametersService.mapSizeParameter(userParameters, 513, replyMarkupService);
-                case "Large" -> userParametersService.mapSizeParameter(userParameters, 713, replyMarkupService);
-                case "x1" -> userParametersService.mapScaleParameter(userParameters, 1, replyMarkupService);
-                case "x2" -> userParametersService.mapScaleParameter(userParameters, 2, replyMarkupService);
-                case "x4" -> userParametersService.mapScaleParameter(userParameters, 4, replyMarkupService);
-                case "Smooth" -> userParametersService.mapHeightParameter(userParameters, 2, replyMarkupService);
-                case "Hill" -> userParametersService.mapHeightParameter(userParameters, 4, replyMarkupService);
-                case "Mountain" -> userParametersService.mapHeightParameter(userParameters, 9, replyMarkupService);
-                case "Islands" -> userParametersService.mapIslandParameter(userParameters, 1, replyMarkupService);
-                case "Backwater" -> userParametersService.mapIslandParameter(userParameters, 10, replyMarkupService);
-                case "Continent" -> userParametersService.mapIslandParameter(userParameters, 40, replyMarkupService);
-                case "back" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
-                case "Generate" -> {
-                    var up = userParametersRepository.findByChatId(chatId).orElseThrow();
-                    sendPhoto = botContentService.getSendPhoto(chatId, null, up);
-                    TerraNotaMap t = botContentService.getTerraNotaMap();
-                    updateService.setUsernameDateMapIdMapHash(up, update, t);
-                    userParametersRepository.save(up);
-                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(Optional.of(up)));
-                }
-                default -> {
-                    if (callbackData.contains("get map ")) {
-                        callbackData = callbackData.substring("get map ".length()).trim();
-                        var usersParamByMapHash = userParametersRepository.findByMapHash(Integer.parseInt(callbackData));
-                        Optional<TerraNotaMap> terraNotaMap = Optional.empty();
-                        if (usersParamByMapHash.isPresent())
-                            terraNotaMap = Optional.of(fromJson(usersParamByMapHash.get().getMapid()));
-                        sendPhoto = botContentService.getSendPhoto(chatId, terraNotaMap.orElse(null), null);
-                        Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userPatamLastMapOptional));
-                    } else if (callbackData.contains("Water level +1 ")) {
-                        callbackData = callbackData.substring("Water level +1 ".length()).trim();
-                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -1, "Water level +1 ", sendPhoto, chatId);
-                    } else if (callbackData.contains("Water level -1 ")) {
-                        callbackData = callbackData.substring("Water level -1 ".length()).trim();
-                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), 1, "Water level -1 ", sendPhoto, chatId);
-                    } else if (callbackData.contains("Water level +5 ")) {
-                        callbackData = callbackData.substring("Water level +5 ".length()).trim();
-                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -5, "Water level +5 ", sendPhoto, chatId);
-                    } else if (callbackData.contains("Water level -5 ")) {
-                        callbackData = callbackData.substring("Water level -5 ".length()).trim();
-                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), +5, "Water level -5 ", sendPhoto, chatId);
-                    } else if (callbackData.contains("back to map ")) {
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
-                    } else if (callbackData.contains("control water level ")) {
-                        callbackData = callbackData.substring("control water level ".length()).trim();
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getControlWaterLevelBottons(callbackData));
-                    } else {
-                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMapManipulationButtons(callbackData));
-                    }
+            ReplyMarcupInt replyMarcupInt = replyMarcupInterfaceMap.get(callbackData);
+            if(replyMarcupInt != null){
+                replyMarcupInt.setReplyMarcup();
+            } else {
+                if (callbackData.contains("get map ")) {
+                    callbackData = callbackData.substring("get map ".length()).trim();
+                    var usersParamByMapHash = userParametersRepository.findByMapHash(Integer.parseInt(callbackData));
+                    Optional<TerraNotaMap> terraNotaMap = Optional.empty();
+                    if (usersParamByMapHash.isPresent())
+                        terraNotaMap = Optional.of(fromJson(usersParamByMapHash.get().getMapid()));
+                    photoService.setSendPhoto(botContentService.getSendPhoto(chatId, terraNotaMap.orElse(null), null));
+                    Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
+                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userPatamLastMapOptional));
+                } else if (callbackData.contains("Water level +1 ")) {
+                    callbackData = callbackData.substring("Water level +1 ".length()).trim();
+                    replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -1, "Water level +1 ", photoService.getSendPhoto(), chatId);
+                } else if (callbackData.contains("Water level -1 ")) {
+                    callbackData = callbackData.substring("Water level -1 ".length()).trim();
+                    replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), 1, "Water level -1 ", photoService.getSendPhoto(), chatId);
+                } else if (callbackData.contains("Water level +5 ")) {
+                    callbackData = callbackData.substring("Water level +5 ".length()).trim();
+                    replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -5, "Water level +5 ", photoService.getSendPhoto(), chatId);
+                } else if (callbackData.contains("Water level -5 ")) {
+                    callbackData = callbackData.substring("Water level -5 ".length()).trim();
+                    replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), +5, "Water level -5 ", photoService.getSendPhoto(), chatId);
+                } else if (callbackData.contains("back to map ")) {
+                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+                } else if (callbackData.contains("control water level ")) {
+                    callbackData = callbackData.substring("control water level ".length()).trim();
+                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getControlWaterLevelBottons(callbackData));
+                } else {
+                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMapManipulationButtons(callbackData));
                 }
             }
+//            switch (callbackData) {
+//                //+
+//                case "Map size" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getSizeButtons());
+//                //+
+//                case "Scale" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getScaleButtons());
+//                //+
+//                case "Height difference" ->
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getHeightDifferenceButtons());
+//                //+
+//                case "Islands modifier" ->
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getIslandsModifierButtons());
+//                //+
+//                case "Get last map" ->
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userParametersRepository.findByChatId(chatId)));
+//                //+
+//                case "Small" -> userParametersService.mapSizeParameter(userParameters, 129, replyMarkupService);
+//                //+
+//                case "Medium" -> userParametersService.mapSizeParameter(userParameters, 513, replyMarkupService);
+//                //+
+//                case "Large" -> userParametersService.mapSizeParameter(userParameters, 713, replyMarkupService);
+//                //+
+//                case "x1" -> userParametersService.mapScaleParameter(userParameters, 1, replyMarkupService);
+//                //+
+//                case "x2" -> userParametersService.mapScaleParameter(userParameters, 2, replyMarkupService);
+//                //+
+//                case "x4" -> userParametersService.mapScaleParameter(userParameters, 4, replyMarkupService);
+//                //+
+//                case "Smooth" -> userParametersService.mapHeightParameter(userParameters, 2, replyMarkupService);
+//                //+
+//                case "Hill" -> userParametersService.mapHeightParameter(userParameters, 4, replyMarkupService);
+//                //+
+//                case "Mountain" -> userParametersService.mapHeightParameter(userParameters, 9, replyMarkupService);
+//                //+
+//                case "Islands" -> userParametersService.mapIslandParameter(userParameters, 1, replyMarkupService);
+//                //+
+//                case "Backwater" -> userParametersService.mapIslandParameter(userParameters, 10, replyMarkupService);
+//                //+
+//                case "Continent" -> userParametersService.mapIslandParameter(userParameters, 40, replyMarkupService);
+//                //+
+//                case "back" -> replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+//                //+
+//                case "Generate" -> {
+//                    var up = userParametersRepository.findByChatId(chatId).orElseThrow();
+//                    photoService.setSendPhoto(botContentService.getSendPhoto(chatId, null, up));
+//                    TerraNotaMap t = botContentService.getTerraNotaMap();
+//                    updateService.setUsernameDateMapIdMapHash(up, update, t);
+//                    userParametersRepository.save(up);
+//                    replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(Optional.of(up)));
+//                }
+//                default -> {
+//                    if (callbackData.contains("get map ")) {
+//                        callbackData = callbackData.substring("get map ".length()).trim();
+//                        var usersParamByMapHash = userParametersRepository.findByMapHash(Integer.parseInt(callbackData));
+//                        Optional<TerraNotaMap> terraNotaMap = Optional.empty();
+//                        if (usersParamByMapHash.isPresent())
+//                            terraNotaMap = Optional.of(fromJson(usersParamByMapHash.get().getMapid()));
+//                        photoService.setSendPhoto(botContentService.getSendPhoto(chatId, terraNotaMap.orElse(null), null));
+//                        Optional<UserParameters> userPatamLastMapOptional = userParametersRepository.findByChatId(chatId);
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getLastMapButton(userPatamLastMapOptional));
+//                    } else if (callbackData.contains("Water level +1 ")) {
+//                        callbackData = callbackData.substring("Water level +1 ".length()).trim();
+//                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -1, "Water level +1 ", photoService.getSendPhoto(), chatId);
+//                    } else if (callbackData.contains("Water level -1 ")) {
+//                        callbackData = callbackData.substring("Water level -1 ".length()).trim();
+//                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), 1, "Water level -1 ", photoService.getSendPhoto(), chatId);
+//                    } else if (callbackData.contains("Water level +5 ")) {
+//                        callbackData = callbackData.substring("Water level +5 ".length()).trim();
+//                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), -5, "Water level +5 ", photoService.getSendPhoto(), chatId);
+//                    } else if (callbackData.contains("Water level -5 ")) {
+//                        callbackData = callbackData.substring("Water level -5 ".length()).trim();
+//                        replyMarkupService.setReplyMarkupUpdateData(callbackData, replyMarkupService.getReplyMarkup(), +5, "Water level -5 ", photoService.getSendPhoto(), chatId);
+//                    } else if (callbackData.contains("back to map ")) {
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMainButtons(userParameters));
+//                    } else if (callbackData.contains("control water level ")) {
+//                        callbackData = callbackData.substring("control water level ".length()).trim();
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getControlWaterLevelBottons(callbackData));
+//                    } else {
+//                        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getMapManipulationButtons(callbackData));
+//                    }
+//                }
+//            }
         }
         try {
-            if (sendPhoto != null)
+            if (photoService.getSendPhoto() != null)
                 execute(photoService.getSendPhoto());
             if (replyMarkupService.getReplyMarkup() != null)
                 execute(replyMarkupService.getReplyMarkup());
-//            if (sendMessage != null)
-//                execute(sendMessage);
         } catch (Exception e) {
             log.error(e.getMessage());
         }
