@@ -1,4 +1,4 @@
-package vladislavmaltsev.terranotabot.components.islandscomponents;
+package vladislavmaltsev.terranotabot.components.sizecomponents.islandscomponents;
 
 import org.springframework.stereotype.Component;
 import vladislavmaltsev.terranotabot.components.interfaces.ReplyMarcupInt;
@@ -8,16 +8,16 @@ import vladislavmaltsev.terranotabot.service.UpdateService;
 import vladislavmaltsev.terranotabot.service.UserParametersService;
 
 @Component
-public class IslandsComponent implements ReplyMarcupInt {
+public class ContinentComponent implements ReplyMarcupInt {
 
     private final ReplyMarkupService replyMarkupService;
 
     private final UserParametersService userParametersService;
     private final UpdateService updateService;
 
-    public IslandsComponent(ReplyMarkupService replyMarkupService,
-                            UserParametersService userParametersService,
-                            UpdateService updateService) {
+    public ContinentComponent(ReplyMarkupService replyMarkupService,
+                              UserParametersService userParametersService,
+                              UpdateService updateService) {
         this.replyMarkupService = replyMarkupService;
         this.userParametersService = userParametersService;
         this.updateService = updateService;
@@ -30,11 +30,11 @@ public class IslandsComponent implements ReplyMarcupInt {
                         updateService.getUpdate(),
                         updateService.getMessageId());
 
-        userParametersService.mapIslandParameter(userParameters, 1, replyMarkupService);
+        userParametersService.mapIslandParameter(userParameters, 40, replyMarkupService);
     }
 
 
     public String getId() {
-        return "Islands";
+        return "Continent";
     }
 }

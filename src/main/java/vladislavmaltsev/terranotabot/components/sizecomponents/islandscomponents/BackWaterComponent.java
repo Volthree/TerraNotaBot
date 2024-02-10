@@ -1,4 +1,4 @@
-package vladislavmaltsev.terranotabot.components.islandscomponents;
+package vladislavmaltsev.terranotabot.components.sizecomponents.islandscomponents;
 
 import org.springframework.stereotype.Component;
 import vladislavmaltsev.terranotabot.components.interfaces.ReplyMarcupInt;

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import vladislavmaltsev.terranotabot.service.BottonsService;
 import vladislavmaltsev.terranotabot.service.ReplyMarkupService;
 
-@Component
 public interface ReplyMarcupInt {
 
 

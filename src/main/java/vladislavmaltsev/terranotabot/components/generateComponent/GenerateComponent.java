@@ -38,12 +38,6 @@ public class GenerateComponent implements ReplyMarcupInt {
     }
 
     public void setReplyMarcup() {
-        UserParametersDTO userParameters = userParametersService
-                .getUserParametersDependsExisted(
-                        updateService.getChatId(),
-                        updateService.getUpdate(),
-                        updateService.getMessageId());
-
         var up = userParametersRepository.findByChatId(updateService.getChatId()).orElseThrow();
         photoService.setSendPhoto(botContentService.getSendPhoto(updateService.getChatId(), null, up));
         TerraNotaMap t = botContentService.getTerraNotaMap();

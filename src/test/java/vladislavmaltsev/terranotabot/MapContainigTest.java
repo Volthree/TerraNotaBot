@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import vladislavmaltsev.terranotabot.components.maincomponents.HeightDiffComponent;
-import vladislavmaltsev.terranotabot.components.maincomponents.IslandsComponent;
+import vladislavmaltsev.terranotabot.components.maincomponents.IslandsModifierComponent;
 import vladislavmaltsev.terranotabot.components.maincomponents.MapSizeComponent;
 import vladislavmaltsev.terranotabot.components.maincomponents.ScaleComponent;
 import vladislavmaltsev.terranotabot.components.interfaces.ReplyMarcupInt;
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @SpringBootTest(classes = {
         HeightDiffComponent.class,
-        IslandsComponent.class,
+        IslandsModifierComponent.class,
         MapSizeComponent.class,
         ScaleComponent.class
 })

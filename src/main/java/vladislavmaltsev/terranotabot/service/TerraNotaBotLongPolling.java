@@ -38,7 +38,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     private final PhotoService photoService;
     private final SendMessageService sendMessageService;
     private Map<String, ReplyMarcupInt> replyMarcupInterfaceMap;
-    private final SendPhotoComponent sendPhotoComponent;
 
     @Autowired
     public TerraNotaBotLongPolling(TelegramBotConfig telegramBotConfig,
@@ -49,8 +48,7 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
                                    ReplyMarkupService replyMarkupService,
                                    PhotoService photoService,
                                    SendMessageService sendMessageService,
-                                   List<ReplyMarcupInt> replyMarcupIntList,
-                                   SendPhotoComponent sendPhotoComponent) {
+                                   List<ReplyMarcupInt> replyMarcupIntList) {
         super(telegramBotConfig.getToken());
         this.telegramBotConfig = telegramBotConfig;
         this.bottonsService = bottonsService;
@@ -64,7 +62,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
         this.replyMarcupInterfaceMap = replyMarcupIntList.stream().collect(Collectors.toMap(
                 ReplyMarcupInt::getId, x -> x
         ));
-        this.sendPhotoComponent = sendPhotoComponent;
     }
 
     @SneakyThrows
@@ -72,7 +69,6 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
     @LogAnn
     @Transactional
     public void onUpdateReceived(Update update) {
-//        SendPhoto sendPhoto = null;
         SendMessage sendMessage = null;
         UserParametersDTO userParameters = null;
         if (update.hasMessage() && update.getMessage().hasText()) {
@@ -207,8 +203,10 @@ public class TerraNotaBotLongPolling extends TelegramLongPollingBot {
 //            }
         }
         try {
-            if (photoService.getSendPhoto() != null)
+            if (photoService.getSendPhoto() != null){
                 execute(photoService.getSendPhoto());
+                photoService.setSendPhoto(null);
+            }
             if (replyMarkupService.getReplyMarkup() != null)
                 execute(replyMarkupService.getReplyMarkup());
         } catch (Exception e) {

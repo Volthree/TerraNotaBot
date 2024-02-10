@@ -17,7 +17,7 @@ public class ScaleComponent implements ReplyMarcupInt {
     }
 
     public void setReplyMarcup() {
-        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getSizeButtons());
+        replyMarkupService.setReplyMarkupKeyboard(bottonsService.getScaleButtons());
     }
 
 
