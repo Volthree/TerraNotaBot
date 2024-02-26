@@ -12,6 +12,9 @@ Select parameters and generate map!
 
 Watch result and change water level on your map!
 From
+
 ![Gen](ScreenshotsForReadme/basemap.png) 
+
 To
+
 ![Gen](ScreenshotsForReadme/changemap.png)
