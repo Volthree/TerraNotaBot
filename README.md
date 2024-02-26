@@ -1,21 +1,18 @@
 # TerraNotaBot_V1.0.1
 
-This is TerraNotaBot.
-You can create geographic map image depends on:
-Map size -  for picture size
-Scale -  for pixel-style
-Height difference -  for heights
-Islands modifier -  for land area
+This is TerraNotaBot. <br />
+You can create geographic map image depends on: <br />
 
-Select parameters and generate map!
+Map size -  for picture size <br />
+Scale -  for pixel-style  <br />
+Height difference -  for heights <br />
+Islands modifier -  for land area <br />
 
-![Gen](ScreenshotsForReadme/start.png) 
+Select parameters and generate map! <br />
 
-Watch result and change water level on your map!
-From
-
-![Gen](ScreenshotsForReadme/basemap.png) 
-
-To
-
-![Gen](ScreenshotsForReadme/changemap.png)
+<img src="ScreenshotsForReadme/start.png" align="left" height="400" width="350" > <BR CLEAR=LEFT />
+Watch result and change water level on your map! <br />
+From <br />
+<img src="ScreenshotsForReadme/basemap.png" align="left" height="300" width="300" > <BR CLEAR=LEFT />
+To <br />
+<img src="ScreenshotsForReadme/changemap.png" align="left" height="300" width="300" > <BR CLEAR=LEFT />
