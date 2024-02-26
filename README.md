@@ -8,6 +8,7 @@ Height difference -  for heights
 Islands modifier -  for land area
 
 Select parameters and generate map!
+
 ![Gen](ScreenshotsForReadme/start.png) 
 
 Watch result and change water level on your map!
